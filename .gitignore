@@ -1,0 +1,53 @@
+# Environment
+.env
+.env.*
+
+# Dependencies
+/vendor/
+composer.lock
+
+# Storage (writable at runtime)
+/storage/cache/
+/storage/logs/
+/storage/data/
+/storage/tmp/
+/storage/jobs/
+/storage/tg_sessions/
+/storage/uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup / Old versions - never commit
+/backup/
+/old/
+
+# Documentation - not for repo
+/docs/
+
+# Claude / AI tools
+/.claude/
+
+# Test & temp files
+*.tmp
+*.bak
+*.log
+.phpunit.result.cache
+phpunit.xml
+.php-cs-fixer.cache
+
+# Node (if used)
+node_modules/
+package-lock.json
+
+# Build
+/dist/
+/build/
