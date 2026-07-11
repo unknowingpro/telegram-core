@@ -128,6 +128,8 @@ $router->group('/bot', function (Router $router) {
     $router->match(['GET', 'POST'], '/{token}/unbanChatMember', 'App\Controllers\BotApi\ChatController@unbanChatMember');
     $router->match(['GET', 'POST'], '/{token}/restrictChatMember', 'App\Controllers\BotApi\ChatController@restrictChatMember');
     $router->match(['GET', 'POST'], '/{token}/promoteChatMember', 'App\Controllers\BotApi\ChatController@promoteChatMember');
+    $router->match(['GET', 'POST'], '/{token}/banChatSenderChat', 'App\Controllers\BotApi\ChatController@banChatSenderChat');
+    $router->match(['GET', 'POST'], '/{token}/unbanChatSenderChat', 'App\Controllers\BotApi\ChatController@unbanChatSenderChat');
 
     // ==================== PIN ====================
     $router->match(['GET', 'POST'], '/{token}/pinChatMessage', 'App\Controllers\BotApi\ChatController@pinChatMessage');
@@ -243,8 +245,6 @@ $router->group('/bot', function (Router $router) {
     $router->match(['GET', 'POST'], '/{token}/answerGuestQuery', 'App\Controllers\BotApi\MiscellaneousController@answerGuestQuery');
     $router->match(['GET', 'POST'], '/{token}/approveSuggestedPost', 'App\Controllers\BotApi\MiscellaneousController@approveSuggestedPost');
     $router->match(['GET', 'POST'], '/{token}/declineSuggestedPost', 'App\Controllers\BotApi\MiscellaneousController@declineSuggestedPost');
-    $router->match(['GET', 'POST'], '/{token}/banChatSenderChat', 'App\Controllers\BotApi\MiscellaneousController@banChatSenderChat');
-    $router->match(['GET', 'POST'], '/{token}/unbanChatSenderChat', 'App\Controllers\BotApi\MiscellaneousController@unbanChatSenderChat');
     $router->match(['GET', 'POST'], '/{token}/createChatSubscriptionInviteLink', 'App\Controllers\BotApi\MiscellaneousController@createChatSubscriptionInviteLink');
     $router->match(['GET', 'POST'], '/{token}/editChatSubscriptionInviteLink', 'App\Controllers\BotApi\MiscellaneousController@editChatSubscriptionInviteLink');
     $router->match(['GET', 'POST'], '/{token}/deleteStickerSet', 'App\Controllers\BotApi\MiscellaneousController@deleteStickerSet');

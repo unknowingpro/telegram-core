@@ -99,39 +99,6 @@ class MiscellaneousController extends BaseController
     }
 
     /**
-     * banChatSenderChat — Ban a channel/sender chat
-     */
-    public function banChatSenderChat(Request $request, string $token): Response
-    {
-        try {
-            $chatId = $this->required($request, 'chat_id');
-            $senderChatId = $this->required($request, 'sender_chat_id');
-
-            // Mark as banned in the chat_members for this sender chat
-            (new \App\Models\ChatMemberModel())->banMember($chatId, $senderChatId);
-            return $this->ok(true);
-        } catch (\InvalidArgumentException $e) {
-            return $this->error($e->getMessage(), 400);
-        }
-    }
-
-    /**
-     * unbanChatSenderChat — Unban a channel/sender chat
-     */
-    public function unbanChatSenderChat(Request $request, string $token): Response
-    {
-        try {
-            $chatId = $this->required($request, 'chat_id');
-            $senderChatId = $this->required($request, 'sender_chat_id');
-
-            (new \App\Models\ChatMemberModel())->removeMember($chatId, $senderChatId);
-            return $this->ok(true);
-        } catch (\InvalidArgumentException $e) {
-            return $this->error($e->getMessage(), 400);
-        }
-    }
-
-    /**
      * createChatSubscriptionInviteLink — Create subscription invite link
      */
     public function createChatSubscriptionInviteLink(Request $request, string $token): Response
