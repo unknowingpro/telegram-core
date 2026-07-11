@@ -30,7 +30,7 @@ class UpdateController extends BaseController
      */
     public function getUpdates(Request $request, string $token): Response
     {
-        $userId = $this->getBotUserId($token);
+        $userId = $this->getBotId($token);
         $offset = $this->intInput($request, 'offset', 0);
         $limit = min($this->intInput($request, 'limit', 100), 100);
         $timeout = $this->intInput($request, 'timeout', 0);
@@ -91,7 +91,7 @@ class UpdateController extends BaseController
             $dropPendingUpdates = $this->boolInput($request, 'drop_pending_updates');
             $hasCustomCertificate = $this->boolInput($request, 'certificate') || $this->input($request, 'certificate') !== null;
 
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             // Delete existing webhook if drop_pending_updates
             if ($dropPendingUpdates) {
@@ -135,7 +135,7 @@ class UpdateController extends BaseController
      */
     public function deleteWebhook(Request $request, string $token): Response
     {
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
         $dropPending = $this->boolInput($request, 'drop_pending_updates');
 
         $this->db->table('webhooks')
@@ -156,7 +156,7 @@ class UpdateController extends BaseController
      */
     public function getWebhookInfo(Request $request, string $token): Response
     {
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
 
         $webhook = $this->db->table('webhooks')
             ->where('user_id', $botId)
@@ -187,8 +187,4 @@ class UpdateController extends BaseController
         ]);
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

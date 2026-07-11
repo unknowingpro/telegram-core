@@ -32,7 +32,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $text = $this->required($request, 'text');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendText($chatId, $senderId, $text, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -64,7 +64,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             // Handle file upload or string file_id
             $photo = $this->resolveFileUpload($request, 'photo', $senderId);
@@ -104,7 +104,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $audio = $this->resolveFileUpload($request, 'audio', $senderId);
             if ($audio === null) {
@@ -152,7 +152,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $document = $this->resolveFileUpload($request, 'document', $senderId);
             if ($document === null) {
@@ -195,7 +195,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $video = $this->resolveFileUpload($request, 'video', $senderId);
             if ($video === null) {
@@ -242,7 +242,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $animation = $this->resolveFileUpload($request, 'animation', $senderId);
             if ($animation === null) {
@@ -288,7 +288,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $voice = $this->resolveFileUpload($request, 'voice', $senderId);
             if ($voice === null) {
@@ -328,7 +328,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $videoNote = $this->resolveFileUpload($request, 'video_note', $senderId);
             if ($videoNote === null) {
@@ -369,7 +369,7 @@ class MessagingController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $latitude = (float) $this->required($request, 'latitude');
             $longitude = (float) $this->required($request, 'longitude');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendLocation($chatId, $senderId, $latitude, $longitude, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -406,7 +406,7 @@ class MessagingController extends BaseController
             $longitude = (float) $this->required($request, 'longitude');
             $title = $this->required($request, 'title');
             $address = $this->required($request, 'address');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendVenue($chatId, $senderId, $latitude, $longitude, $title, $address, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -441,7 +441,7 @@ class MessagingController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $phoneNumber = $this->required($request, 'phone_number');
             $firstName = $this->required($request, 'first_name');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendContact($chatId, $senderId, $phoneNumber, $firstName, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -472,7 +472,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendDice($chatId, $senderId, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -504,7 +504,7 @@ class MessagingController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $question = $this->required($request, 'question');
             $optionsRaw = $this->required($request, 'options');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $options = is_string($optionsRaw) ? json_decode($optionsRaw, true) : $optionsRaw;
 
@@ -583,7 +583,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $mediaRaw = $this->required($request, 'media');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
 
@@ -630,7 +630,7 @@ class MessagingController extends BaseController
             $fromChatId = $this->required($request, 'from_chat_id');
             $chatId = $this->required($request, 'chat_id');
             $messageId = $this->required($request, 'message_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->forwardMessage($fromChatId, $chatId, $messageId, $senderId, [
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
@@ -657,7 +657,7 @@ class MessagingController extends BaseController
             $fromChatId = $this->required($request, 'from_chat_id');
             $chatId = $this->required($request, 'chat_id');
             $messageIdsRaw = $this->required($request, 'message_ids');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $messageIds = is_string($messageIdsRaw) ? json_decode($messageIdsRaw, true) : $messageIdsRaw;
 
@@ -682,7 +682,7 @@ class MessagingController extends BaseController
             $fromChatId = $this->required($request, 'from_chat_id');
             $chatId = $this->required($request, 'chat_id');
             $messageId = $this->required($request, 'message_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->copyMessage($fromChatId, $chatId, $messageId, $senderId, [
                 'caption' => $this->input($request, 'caption'),
@@ -715,7 +715,7 @@ class MessagingController extends BaseController
             $fromChatId = $this->required($request, 'from_chat_id');
             $chatId = $this->required($request, 'chat_id');
             $messageIdsRaw = $this->required($request, 'message_ids');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $messageIds = is_string($messageIdsRaw) ? json_decode($messageIdsRaw, true) : $messageIdsRaw;
 
@@ -1009,7 +1009,7 @@ class MessagingController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $messageId = $this->required($request, 'message_id');
 
-            $this->messageService->deleteReaction($chatId, $messageId, $this->getBotUserId($token));
+            $this->messageService->deleteReaction($chatId, $messageId, $this->getBotId($token));
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
@@ -1041,7 +1041,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $sticker = $this->resolveFileUpload($request, 'sticker', $senderId);
             if ($sticker === null) {
@@ -1078,7 +1078,7 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $photo = $this->resolveFileUpload($request, 'photo', $senderId);
             if ($photo === null) {
@@ -1118,7 +1118,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $mediaRaw = $this->required($request, 'media');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
 
@@ -1176,7 +1176,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $text = $this->required($request, 'text');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $result = $this->messageService->sendText($chatId, $senderId, $text, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -1221,7 +1221,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $bodyRaw = $this->required($request, 'body');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
 
@@ -1296,7 +1296,7 @@ class MessagingController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $title = $this->required($request, 'title');
             $itemsRaw = $this->required($request, 'items');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $items = is_string($itemsRaw) ? json_decode($itemsRaw, true) : $itemsRaw;
 
@@ -1342,7 +1342,7 @@ class MessagingController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
             $bodyRaw = $this->required($request, 'body');
-            $senderId = $this->getBotUserId($token);
+            $senderId = $this->getBotId($token);
 
             $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
 
@@ -1374,11 +1374,4 @@ class MessagingController extends BaseController
         }
     }
 
-    /**
-     * Get bot's user ID from token
-     */
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

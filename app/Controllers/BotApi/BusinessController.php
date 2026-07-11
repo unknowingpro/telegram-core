@@ -376,11 +376,4 @@ class BusinessController extends BaseController
         }
     }
 
-    /**
-     * Get bot ID from token
-     */
-    private function getBotId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

@@ -113,7 +113,7 @@ class MiscellaneousController extends BaseController
 
             $linkId = $this->db->table('invite_links')->insert([
                 'chat_id' => $chatId,
-                'creator_id' => $this->getBotUserId($token),
+                'creator_id' => $this->getBotId($token),
                 'invite_link' => $inviteLink,
                 'name' => $this->input($request, 'name', 'Subscription'),
                 'expire_date' => $this->intInput($request, 'expire_date') ? date('Y-m-d H:i:s', $this->intInput($request, 'expire_date')) : null,
@@ -125,7 +125,7 @@ class MiscellaneousController extends BaseController
 
             return $this->ok([
                 'invite_link' => $inviteLink,
-                'creator' => $this->getBotUserId($token),
+                'creator' => $this->getBotId($token),
                 'creates_join_request' => true,
                 'is_primary' => false,
                 'is_revoked' => false,
@@ -174,7 +174,7 @@ class MiscellaneousController extends BaseController
 
             return $this->ok([
                 'invite_link' => $inviteLink,
-                'creator' => $this->getBotUserId($token),
+                'creator' => $this->getBotId($token),
                 'creates_join_request' => true,
                 'is_primary' => false,
                 'is_revoked' => false,
@@ -268,7 +268,7 @@ class MiscellaneousController extends BaseController
                     ->where('token', $token)
                     ->update($updates);
             } elseif (!empty($updates)) {
-                $updates['user_id'] = $this->getBotUserId($token);
+                $updates['user_id'] = $this->getBotId($token);
                 $updates['token'] = $token;
                 $this->db->table('bot_accounts')->insert($updates);
             }
@@ -309,7 +309,7 @@ class MiscellaneousController extends BaseController
                     ->update(['token' => $newToken]);
             } else {
                 $this->db->table('bot_accounts')->insert([
-                    'user_id' => $this->getBotUserId($token),
+                    'user_id' => $this->getBotId($token),
                     'token' => $newToken,
                 ]);
             }
@@ -421,8 +421,4 @@ class MiscellaneousController extends BaseController
         }
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

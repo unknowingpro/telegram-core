@@ -115,7 +115,7 @@ class ChatController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
             $photo = $this->resolveFileUpload($request, 'photo', $botId) ?? $this->required($request, 'photo');
             $this->chatModel->update($chatId, ['photo_file_id' => $photo]);
             return $this->ok(true);
@@ -200,7 +200,7 @@ class ChatController extends BaseController
             $menuButtonRaw = $this->required($request, 'menu_button');
             $menuButton = is_string($menuButtonRaw) ? json_decode($menuButtonRaw, true) : $menuButtonRaw;
 
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             // Store menu button preference in bot_accounts as JSON
             $existing = $this->db->table('bot_accounts')
@@ -269,7 +269,7 @@ class ChatController extends BaseController
 
         $this->db->table('invite_links')->insert([
             'chat_id' => $chatId,
-            'creator_id' => $this->getBotUserId($token),
+            'creator_id' => $this->getBotId($token),
             'invite_link' => $inviteLink,
             'is_primary' => true,
             'is_revoked' => false,
@@ -291,7 +291,7 @@ class ChatController extends BaseController
 
             $linkId = $this->db->table('invite_links')->insert([
                 'chat_id' => $chatId,
-                'creator_id' => $this->getBotUserId($token),
+                'creator_id' => $this->getBotId($token),
                 'invite_link' => $inviteLink,
                 'name' => $this->input($request, 'name', ''),
                 'expire_date' => $this->intInput($request, 'expire_date') ? date('Y-m-d H:i:s', $this->intInput($request, 'expire_date')) : null,
@@ -307,7 +307,7 @@ class ChatController extends BaseController
 
             return $this->ok([
                 'invite_link' => $inviteLink,
-                'creator' => $this->getBotUserId($token),
+                'creator' => $this->getBotId($token),
                 'creates_join_request' => (bool) $invite['creates_join_request'],
                 'is_primary' => false,
                 'is_revoked' => false,
@@ -360,7 +360,7 @@ class ChatController extends BaseController
 
             return $this->ok([
                 'invite_link' => $inviteLink,
-                'creator' => $this->getBotUserId($token),
+                'creator' => $this->getBotId($token),
                 'creates_join_request' => (bool) ($updates['creates_join_request'] ?? $existing['creates_join_request']),
                 'is_primary' => (bool) $existing['is_primary'],
                 'is_revoked' => (bool) $existing['is_revoked'],
@@ -396,7 +396,7 @@ class ChatController extends BaseController
 
             return $this->ok([
                 'invite_link' => $inviteLink,
-                'creator' => $this->getBotUserId($token),
+                'creator' => $this->getBotId($token),
                 'is_primary' => (bool) $existing['is_primary'],
                 'is_revoked' => true,
             ]);
@@ -606,7 +606,7 @@ class ChatController extends BaseController
         $this->db->table('pinned_messages')->insert([
             'chat_id' => $chatId,
             'message_id' => $messageId,
-            'pinned_by' => $this->getBotUserId($token),
+            'pinned_by' => $this->getBotId($token),
         ]);
         return $this->ok(true);
     }
@@ -649,7 +649,7 @@ class ChatController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            (new ChatMemberModel())->removeMember($chatId, $this->getBotUserId($token));
+            (new ChatMemberModel())->removeMember($chatId, $this->getBotId($token));
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
@@ -686,8 +686,4 @@ class ChatController extends BaseController
         }
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

@@ -18,7 +18,7 @@ class StarsController extends BaseController
      */
     public function getMyStarBalance(Request $request, string $token): Response
     {
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
 
         $balance = $this->db->table('star_transactions')
             ->where('user_id', $botId)
@@ -33,7 +33,7 @@ class StarsController extends BaseController
      */
     public function getStarTransactions(Request $request, string $token): Response
     {
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
         $offset = $this->intInput($request, 'offset', 0);
         $limit = min($this->intInput($request, 'limit', 100), 100);
 
@@ -63,7 +63,7 @@ class StarsController extends BaseController
         try {
             $userId = $this->required($request, 'user_id');
             $telegramPaymentChargeId = $this->required($request, 'telegram_payment_charge_id');
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             $this->db->table('star_transactions')->insert([
                 'user_id' => $botId,
@@ -110,7 +110,7 @@ class StarsController extends BaseController
         try {
             $userId = $this->required($request, 'user_id');
             $isPaid = $this->boolInput($request, 'is_paid');
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             if ($isPaid) {
                 $this->db->table('star_transactions')->insert([
@@ -144,7 +144,7 @@ class StarsController extends BaseController
         try {
             $userId = $this->required($request, 'user_id');
             $giftId = $this->required($request, 'gift_id');
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             $this->db->table('user_gifts')->insert([
                 'user_id' => $userId,
@@ -227,7 +227,7 @@ class StarsController extends BaseController
     public function getChatGifts(Request $request, string $token): Response
     {
         $chatId = $this->required($request, 'chat_id');
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
 
         $gifts = $this->db->table('user_gifts')
             ->where('user_id', $botId)
@@ -300,7 +300,7 @@ class StarsController extends BaseController
 
             // Calculate conversion value (e.g., 70% of original price)
             $starValue = 70;
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             $this->db->table('star_transactions')->insert([
                 'user_id' => $userId,
@@ -382,7 +382,7 @@ class StarsController extends BaseController
                 return $this->error('Gift cannot be upgraded', 400);
             }
 
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             $this->db->table('user_gifts')
                 ->where('id', $giftId)
@@ -401,8 +401,4 @@ class StarsController extends BaseController
         }
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

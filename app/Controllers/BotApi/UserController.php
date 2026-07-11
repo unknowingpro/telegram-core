@@ -157,7 +157,7 @@ class UserController extends BaseController
     {
         try {
             $photoRaw = $this->required($request, 'photo');
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             $photo = is_string($photoRaw) ? json_decode($photoRaw, true) : $photoRaw;
 
@@ -193,15 +193,11 @@ class UserController extends BaseController
      */
     public function removeMyProfilePhoto(Request $request, string $token): Response
     {
-        $botId = $this->getBotUserId($token);
+        $botId = $this->getBotId($token);
         $this->db->table('users')
             ->where('id', $botId)
             ->update(['avatar_file_id' => null]);
         return $this->ok(true);
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

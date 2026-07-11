@@ -29,7 +29,7 @@ class InlineController extends BaseController
 
             // Store the answered inline query for audit
             $this->db->table('inline_queries')->insert([
-                'user_id' => $this->getBotUserId($token),
+                'user_id' => $this->getBotId($token),
                 'query' => json_encode($results),
                 'offset_val' => $nextOffset,
                 'chat_type' => $this->input($request, 'chat_type'),
@@ -112,7 +112,7 @@ class InlineController extends BaseController
             $id = 'webapp_' . md5($webAppQueryId . time());
 
             $this->db->table('inline_queries')->insert([
-                'user_id' => $this->getBotUserId($token),
+                'user_id' => $this->getBotId($token),
                 'query' => json_encode(['type' => 'webapp_query', 'result' => $result, 'web_app_query_id' => $webAppQueryId]),
                 'chat_type' => 'webapp',
             ]);
@@ -123,8 +123,4 @@ class InlineController extends BaseController
         }
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

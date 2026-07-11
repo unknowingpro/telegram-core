@@ -32,7 +32,7 @@ class PaymentController extends BaseController
                 $totalAmount += $price['amount'];
             }
 
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
 
             // Handle optional photo upload
             $photoUrl = $this->input($request, 'photo_url');
@@ -88,7 +88,7 @@ class PaymentController extends BaseController
                 $totalAmount += $price['amount'];
             }
 
-            $botId = $this->getBotUserId($token);
+            $botId = $this->getBotId($token);
             $linkHash = substr(md5($payload . time()), 0, 16);
 
             $this->db->table('invoices')->insert([
@@ -122,7 +122,7 @@ class PaymentController extends BaseController
             $ok = $this->boolInput($request, 'ok');
 
             $this->db->table('callback_queries')->insert([
-                'user_id' => $this->getBotUserId($token),
+                'user_id' => $this->getBotId($token),
                 'data' => json_encode([
                     'type' => 'shipping_query',
                     'shipping_query_id' => $shippingQueryId,
@@ -148,7 +148,7 @@ class PaymentController extends BaseController
             $ok = $this->boolInput($request, 'ok');
 
             $this->db->table('callback_queries')->insert([
-                'user_id' => $this->getBotUserId($token),
+                'user_id' => $this->getBotId($token),
                 'data' => json_encode([
                     'type' => 'pre_checkout_query',
                     'pre_checkout_query_id' => $preCheckoutQueryId,
@@ -190,8 +190,4 @@ class PaymentController extends BaseController
         return (int) (microtime(true) * 1000) + random_int(0, 999);
     }
 
-    private function getBotUserId(string $token): int
-    {
-        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
-}

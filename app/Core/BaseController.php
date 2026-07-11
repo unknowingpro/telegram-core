@@ -20,6 +20,14 @@ abstract class BaseController
     }
 
     /**
+     * Get bot ID from token
+     */
+    protected function getBotId(string $token): int
+    {
+        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
+    }
+
+    /**
      * Send a success JSON response
      */
     protected function ok(mixed $data = null, array $meta = []): Response
