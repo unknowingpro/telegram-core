@@ -214,6 +214,8 @@ class MessageService
         ]);
 
         $message = $this->messages->find($messageId);
+        $this->broadcastToChat($chatId, 'message', $this->messages->toTelegram($message), $senderId);
+
         return $this->messages->toTelegram($message);
     }
 
@@ -249,6 +251,8 @@ class MessageService
         ]);
 
         $message = $this->messages->find($messageId);
+        $this->broadcastToChat($chatId, 'message', $this->messages->toTelegram($message), $senderId);
+
         return $this->messages->toTelegram($message);
     }
 
@@ -281,6 +285,8 @@ class MessageService
         ]);
 
         $message = $this->messages->find($messageId);
+        $this->broadcastToChat($chatId, 'message', $this->messages->toTelegram($message), $senderId);
+
         return $this->messages->toTelegram($message);
     }
 
@@ -336,6 +342,8 @@ class MessageService
         ]);
 
         $message = $this->messages->find($messageId);
+        $this->broadcastToChat($chatId, 'message', $this->messages->toTelegram($message), $senderId);
+
         return $this->messages->toTelegram($message);
     }
 
