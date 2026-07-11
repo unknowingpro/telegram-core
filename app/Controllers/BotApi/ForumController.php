@@ -134,10 +134,19 @@ class ForumController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $messageThreadId = $this->required($request, 'message_thread_id');
 
-            // Delete pinned messages for this thread
-            $this->db->table('pinned_messages')
+            // Get message IDs for this topic
+            $messageIds = $this->db->table('messages')
                 ->where('chat_id', $chatId)
-                ->delete();
+                ->where('message_thread_id', $messageThreadId)
+                ->pluck('id');
+
+            // Delete pinned messages for this topic
+            if (!empty($messageIds)) {
+                $this->db->table('pinned_messages')
+                    ->where('chat_id', $chatId)
+                    ->whereIn('message_id', $messageIds)
+                    ->delete();
+            }
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
