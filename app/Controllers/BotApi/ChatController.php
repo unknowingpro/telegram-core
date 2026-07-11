@@ -215,7 +215,7 @@ class ChatController extends BaseController
             if ($existing) {
                 $this->db->table('bot_accounts')
                     ->where('token', $token)
-                    ->update(['default_admin_rights' => $menuData]);
+                    ->update(['menu_button' => $menuData]);
             }
 
             return $this->ok(true);
@@ -235,8 +235,8 @@ class ChatController extends BaseController
             ->where('token', $token)
             ->first();
 
-        if ($bot && ($bot['default_admin_rights'] ?? null)) {
-            $menuData = json_decode($bot['default_admin_rights'], true);
+        if ($bot && ($bot['menu_button'] ?? null)) {
+            $menuData = json_decode($bot['menu_button'], true);
             if (isset($menuData['menu_button'])) {
                 return $this->ok($menuData['menu_button']);
             }
