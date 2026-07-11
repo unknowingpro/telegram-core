@@ -6,6 +6,7 @@ namespace App\Controllers\BotApi;
 use App\Core\BaseController;
 use App\Core\Request;
 use App\Core\Response;
+use App\Services\MessageService;
 
 /**
  * Business controller — business account management
@@ -31,7 +32,9 @@ class BusinessController extends BaseController
             if ($existing) {
                 $updates = [];
                 if ($name !== null) $updates['name'] = $name;
-                if ($firstName !== null) $updates['name'] = $firstName;
+                if ($firstName !== null) $updates['first_name'] = $firstName;
+                if ($lastName !== null) $updates['last_name'] = $lastName;
+
                 $this->db->table('business_accounts')
                     ->where('id', $businessConnectionId)
                     ->update($updates);
@@ -207,15 +210,36 @@ class BusinessController extends BaseController
         try {
             $businessConnectionId = $this->required($request, 'business_connection_id');
             $chatId = $this->required($request, 'chat_id');
-            $messageIdsRaw = $this->required($request, 'message_ids');
-            $messageIds = is_string($messageIdsRaw) ? json_decode($messageIdsRaw, true) : $messageIdsRaw;
+            $messageIds = $this->required($request, 'message_ids');
 
-            foreach ($messageIds as $messageId) {
-                $this->db->table('messages')
-                    ->where('id', $messageId)
-                    ->where('chat_id', $chatId)
-                    ->delete();
+            if (!is_array($messageIds)) {
+                $messageIds = json_decode($messageIds, true);
+                if (!is_array($messageIds)) {
+                    throw new \InvalidArgumentException('message_ids must be an array');
+                }
             }
+
+            // Get the user ID from the business connection
+            $business = $this->db->table('business_accounts')
+                ->where('id', $businessConnectionId)
+                ->first();
+
+            if (!$business) {
+                return $this->error('Business connection not found', 404);
+            }
+
+            // Get the actual chat ID from the business connection
+            $chat = $this->db->table('chats')
+                ->where('id', $business['chat_id'])
+                ->first();
+
+            if (!$chat) {
+                // If chat not found, still return true as per Telegram API behavior
+                return $this->ok(true);
+            }
+
+            $messageService = new MessageService();
+            $messageService->deleteMessages($chat['chat_id'], $messageIds);
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
