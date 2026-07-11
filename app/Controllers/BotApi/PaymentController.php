@@ -34,6 +34,10 @@ class PaymentController extends BaseController
 
             $botId = $this->getBotUserId($token);
 
+            // Handle optional photo upload
+            $photoUrl = $this->input($request, 'photo_url');
+            $photoUpload = $this->resolveFileUpload($request, 'photo', $botId);
+
             $this->db->table('invoices')->insert([
                 'user_id' => $botId,
                 'title' => $title,
@@ -45,6 +49,7 @@ class PaymentController extends BaseController
                 'max_tip_amount' => $this->intInput($request, 'max_tip_amount'),
                 'suggested_tip_amounts' => $this->input($request, 'suggested_tip_amounts'),
                 'provider_token' => $this->input($request, 'provider_token'),
+                'provider_data' => $this->input($request, 'provider_data'),
                 'start_parameter' => $payload,
             ]);
 
@@ -97,6 +102,7 @@ class PaymentController extends BaseController
                 'max_tip_amount' => $this->intInput($request, 'max_tip_amount'),
                 'suggested_tip_amounts' => $this->input($request, 'suggested_tip_amounts'),
                 'provider_token' => $this->input($request, 'provider_token'),
+                'provider_data' => $this->input($request, 'provider_data'),
                 'start_parameter' => $linkHash,
             ]);
 

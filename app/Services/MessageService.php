@@ -266,10 +266,25 @@ class MessageService
             'type' => $options['type'] ?? 'regular',
             'allows_multiple_answers' => $options['allows_multiple_answers'] ?? false,
             'correct_option_id' => $options['correct_option_id'] ?? null,
+            'correct_option_ids' => $options['correct_option_ids'] ?? null,
             'explanation' => $options['explanation'] ?? null,
+            'explanation_parse_mode' => $options['explanation_parse_mode'] ?? null,
+            'explanation_media' => $options['explanation_media'] ?? null,
             'open_period' => $options['open_period'] ?? null,
             'close_date' => $options['close_date'] ?? null,
             'is_closed' => $options['is_closed'] ?? false,
+            'question_parse_mode' => $options['question_parse_mode'] ?? null,
+            'question_entities' => $options['question_entities'] ?? null,
+            'allows_revoting' => $options['allows_revoting'] ?? false,
+            'shuffle_options' => $options['shuffle_options'] ?? null,
+            'allow_adding_options' => $options['allow_adding_options'] ?? false,
+            'hide_results_until_closes' => $options['hide_results_until_closes'] ?? false,
+            'members_only' => $options['members_only'] ?? false,
+            'country_codes' => $options['country_codes'] ?? null,
+            'description' => $options['description'] ?? null,
+            'description_parse_mode' => $options['description_parse_mode'] ?? null,
+            'description_entities' => $options['description_entities'] ?? null,
+            'media' => $options['media'] ?? null,
         ];
 
         $messageId = $this->messages->sendMessage([
@@ -279,9 +294,12 @@ class MessageService
             'content_data' => json_encode($contentData),
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => $options['reply_parameters'] ?? null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);

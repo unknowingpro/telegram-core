@@ -440,17 +440,46 @@ class MessagingController extends BaseController
             $options = is_string($optionsRaw) ? json_decode($optionsRaw, true) : $optionsRaw;
 
             $result = $this->messageService->sendPoll($chatId, $senderId, $question, $options, [
+                // Basic poll options
                 'is_anonymous' => $this->boolInput($request, 'is_anonymous', true),
                 'type' => $this->input($request, 'type', 'regular'),
                 'allows_multiple_answers' => $this->boolInput($request, 'allows_multiple_answers'),
                 'correct_option_id' => $this->intInput($request, 'correct_option_id'),
+                'correct_option_ids' => $this->input($request, 'correct_option_ids'),
                 'explanation' => $this->input($request, 'explanation'),
+                'explanation_parse_mode' => $this->input($request, 'explanation_parse_mode'),
+                'explanation_media' => $this->input($request, 'explanation_media'),
                 'open_period' => $this->intInput($request, 'open_period'),
                 'close_date' => $this->intInput($request, 'close_date'),
                 'is_closed' => $this->boolInput($request, 'is_closed'),
+
+                // Question-level formatting
+                'question_parse_mode' => $this->input($request, 'question_parse_mode'),
+                'question_entities' => $this->input($request, 'question_entities'),
+
+                // Advanced poll features
+                'allows_revoting' => $this->boolInput($request, 'allows_revoting'),
+                'shuffle_options' => $this->boolInput($request, 'shuffle_options'),
+                'allow_adding_options' => $this->boolInput($request, 'allow_adding_options'),
+                'hide_results_until_closes' => $this->boolInput($request, 'hide_results_until_closes'),
+                'members_only' => $this->boolInput($request, 'members_only'),
+                'country_codes' => $this->input($request, 'country_codes'),
+
+                // Description
+                'description' => $this->input($request, 'description'),
+                'description_parse_mode' => $this->input($request, 'description_parse_mode'),
+                'description_entities' => $this->input($request, 'description_entities'),
+
+                // Media attachment option
+                'media' => $this->input($request, 'media'),
+
+                // Messaging options
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
