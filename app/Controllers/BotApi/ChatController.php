@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\ChatModel;
 use App\Models\ChatMemberModel;
+use App\Services\MessageService;
 
 /**
  * Chat controller — handles all chat management methods
@@ -446,11 +447,17 @@ class ChatController extends BaseController
 
             // Optionally revoke all recent messages
             if ($revokeMessages) {
-                $this->db->table('messages')
+                $messageService = new MessageService();
+                // Get message IDs from the last 24 hours for this user in this chat
+                $messages = $this->db->table('messages')
                     ->where('chat_id', $chatId)
                     ->where('sender_id', $userId)
                     ->where('created_at', '>', date('Y-m-d H:i:s', time() - 86400))
-                    ->update(['deleted_at' => date('Y-m-d H:i:s')]);
+                    ->pluck('id');
+
+                if (!empty($messages)) {
+                    $messageService->deleteMessages($chatId, $messages);
+                }
             }
 
             return $this->ok(true);
