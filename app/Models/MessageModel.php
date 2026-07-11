@@ -199,6 +199,15 @@ class MessageModel extends BaseModel
             'date' => strtotime($message['created_at']),
         ];
 
+        // Optional top-level fields
+        if (!empty($message['message_thread_id'])) {
+            $result['is_topic_message'] = true;
+            $result['message_thread_id'] = (int) $message['message_thread_id'];
+        }
+        if (!empty($message['business_connection_id'])) {
+            $result['business_connection_id'] = $message['business_connection_id'];
+        }
+
         // Sender info
         if (!empty($message['sender_id'])) {
             $userModel = new UserModel();
@@ -227,6 +236,20 @@ class MessageModel extends BaseModel
         if (!empty($message['caption'])) {
             $result['caption'] = $message['caption'];
         }
+        if (!empty($message['caption_entities'])) {
+            $result['caption_entities'] = json_decode($message['caption_entities'], true);
+        }
+
+        // Media attributes
+        if (!empty($message['has_media_spoiler'])) {
+            $result['has_media_spoiler'] = (bool) $message['has_media_spoiler'];
+        }
+        if (!empty($message['media_group_id'])) {
+            $result['media_group_id'] = $message['media_group_id'];
+        }
+        if (!empty($message['show_caption_above_media'])) {
+            $result['show_caption_above_media'] = (bool) $message['show_caption_above_media'];
+        }
 
         // Reply info
         if (!empty($message['reply_to_message_id'])) {
@@ -234,6 +257,9 @@ class MessageModel extends BaseModel
             if ($replyTo) {
                 $result['reply_to_message'] = $this->toTelegram($replyTo);
             }
+        }
+        if (!empty($message['reply_parameters'])) {
+            $result['reply_parameters'] = json_decode($message['reply_parameters'], true);
         }
 
         // Forward info
@@ -243,13 +269,32 @@ class MessageModel extends BaseModel
                 $result['forward_from'] = (new UserModel())->toTelegram($forwardUser);
             }
         }
+        if (!empty($message['forward_from_chat_id'])) {
+            $forwardChat = (new ChatModel())->find($message['forward_from_chat_id']);
+            if ($forwardChat) {
+                $result['forward_from_chat'] = (new ChatModel())->toTelegram($forwardChat);
+            }
+        }
+        if (!empty($message['forward_from_message_id'])) {
+            $result['forward_from_message_id'] = (int) $message['forward_from_message_id'];
+        }
+        if (!empty($message['forward_date'])) {
+            $result['forward_date'] = is_numeric($message['forward_date'])
+                ? (int) $message['forward_date']
+                : strtotime($message['forward_date']);
+        }
+
+        // Author signature
+        if (!empty($message['author_signature'])) {
+            $result['author_signature'] = $message['author_signature'];
+        }
 
         // Edit date
         if (!empty($message['edit_date'])) {
             $result['edit_date'] = strtotime($message['edit_date']);
         }
 
-        // Content type
+        // Content type (photo, video, audio, document, etc.)
         if (!empty($message['content_type']) && $message['content_type'] !== 'text') {
             $contentData = json_decode($message['content_data'] ?? '{}', true);
             $result[$message['content_type']] = $contentData;

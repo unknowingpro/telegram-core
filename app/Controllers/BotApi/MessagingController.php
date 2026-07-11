@@ -1138,6 +1138,7 @@ class MessagingController extends BaseController
             }
 
             $starCount = (int) $this->input($request, 'star_count', 1);
+            $payload = $this->input($request, 'payload');
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $media[0]['media'] ?? $media['media'] ?? '', 'paid_media', [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
@@ -1153,10 +1154,11 @@ class MessagingController extends BaseController
                 'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'payload' => $payload,
                 'media_data' => [
                     'star_count' => $starCount,
                     'media_items' => $media,
-                    'payload' => $this->input($request, 'payload'),
+                    'payload' => $payload,
                 ],
             ]);
 

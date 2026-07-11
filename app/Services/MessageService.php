@@ -43,13 +43,18 @@ class MessageService
             'sender_id' => $senderId,
             'text' => $text,
             'content_type' => 'text',
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'entities' => isset($options['entities']) ? (is_string($options['entities']) ? $options['entities'] : json_encode($options['entities'])) : null,
             'parse_mode' => $options['parse_mode'] ?? null,
+            'link_preview_options' => isset($options['link_preview_options']) ? (is_string($options['link_preview_options']) ? $options['link_preview_options'] : json_encode($options['link_preview_options'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -78,12 +83,17 @@ class MessageService
             'caption' => $options['caption'] ?? null,
             'caption_entities' => isset($options['caption_entities']) ? (is_string($options['caption_entities']) ? $options['caption_entities'] : json_encode($options['caption_entities'])) : null,
             'parse_mode' => $options['parse_mode'] ?? null,
+            'has_media_spoiler' => $options['has_spoiler'] ?? false,
             'show_caption_above_media' => $options['show_caption_above_media'] ?? false,
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -112,11 +122,17 @@ class MessageService
             'caption' => $options['caption'] ?? null,
             'caption_entities' => isset($options['caption_entities']) ? (is_string($options['caption_entities']) ? $options['caption_entities'] : json_encode($options['caption_entities'])) : null,
             'parse_mode' => $options['parse_mode'] ?? null,
+            'has_media_spoiler' => $options['has_spoiler'] ?? false,
+            'show_caption_above_media' => $options['show_caption_above_media'] ?? false,
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -146,11 +162,15 @@ class MessageService
             'sender_id' => $senderId,
             'content_type' => 'location',
             'content_data' => json_encode(array_filter($contentData, fn($v) => $v !== null)),
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -182,11 +202,15 @@ class MessageService
             'sender_id' => $senderId,
             'content_type' => 'venue',
             'content_data' => json_encode($contentData),
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -213,11 +237,15 @@ class MessageService
             'sender_id' => $senderId,
             'content_type' => 'contact',
             'content_data' => json_encode($contentData),
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -241,11 +269,15 @@ class MessageService
             'sender_id' => $senderId,
             'content_type' => 'dice',
             'content_data' => json_encode($contentData),
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
+            'reply_parameters' => isset($options['reply_parameters']) ? (is_string($options['reply_parameters']) ? $options['reply_parameters'] : json_encode($options['reply_parameters'])) : null,
             'reply_markup' => isset($options['reply_markup']) ? (is_string($options['reply_markup']) ? $options['reply_markup'] : json_encode($options['reply_markup'])) : null,
             'is_protected' => $options['protect_content'] ?? false,
             'disable_notification' => $options['disable_notification'] ?? false,
+            'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+            'message_effect_id' => $options['message_effect_id'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -292,6 +324,7 @@ class MessageService
             'sender_id' => $senderId,
             'content_type' => 'poll',
             'content_data' => json_encode($contentData),
+            'business_connection_id' => $options['business_connection_id'] ?? null,
             'message_thread_id' => $options['message_thread_id'] ?? null,
             'reply_to_message_id' => $options['reply_to_message_id'] ?? null,
             'reply_parameters' => $options['reply_parameters'] ?? null,
@@ -338,11 +371,16 @@ class MessageService
             $fileId = $item['media'] ?? '';
 
             $result = $this->sendMedia($chatId, $senderId, $fileId, $type, [
+                'business_connection_id' => $options['business_connection_id'] ?? null,
                 'caption' => $item['caption'] ?? null,
                 'parse_mode' => $item['parse_mode'] ?? null,
+                'has_spoiler' => $item['has_spoiler'] ?? false,
                 'message_thread_id' => $options['message_thread_id'] ?? null,
                 'disable_notification' => $options['disable_notification'] ?? false,
                 'protect_content' => $options['protect_content'] ?? false,
+                'allow_paid_broadcast' => $options['allow_paid_broadcast'] ?? false,
+                'message_effect_id' => $options['message_effect_id'] ?? null,
+                'reply_parameters' => $options['reply_parameters'] ?? null,
             ]);
             $results[] = $result;
         }
