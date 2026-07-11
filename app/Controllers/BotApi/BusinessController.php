@@ -25,8 +25,10 @@ class BusinessController extends BaseController
             $firstName = $this->input($request, 'first_name');
             $lastName = $this->input($request, 'last_name');
 
+            $botId = $this->getBotId($token);
             $existing = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if ($existing) {
@@ -55,8 +57,10 @@ class BusinessController extends BaseController
             $businessConnectionId = $this->required($request, 'business_connection_id');
             $username = $this->required($request, 'username');
 
+            $botId = $this->getBotId($token);
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->update(['username' => $username]);
 
             return $this->ok(true);
@@ -74,8 +78,10 @@ class BusinessController extends BaseController
             $businessConnectionId = $this->required($request, 'business_connection_id');
             $bio = $this->required($request, 'bio');
 
+            $botId = $this->getBotId($token);
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->update(['bio' => $bio]);
 
             return $this->ok(true);
@@ -94,13 +100,15 @@ class BusinessController extends BaseController
             $photo = $this->required($request, 'photo');
 
             // Handle file upload if this is an InputFile upload
-            $fileId = $this->resolveFileUpload($request, 'photo', 0);
+            $botId = $this->getBotId($token);
+            $fileId = $this->resolveFileUpload($request, 'photo', $botId);
             if ($fileId !== null) {
                 $photo = $fileId;
             }
 
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->update(['profile_photo_file_id' => $photo]);
 
             return $this->ok(true);
@@ -117,8 +125,10 @@ class BusinessController extends BaseController
         try {
             $businessConnectionId = $this->required($request, 'business_connection_id');
 
+            $botId = $this->getBotId($token);
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->update(['profile_photo_file_id' => null]);
 
             return $this->ok(true);
@@ -136,8 +146,10 @@ class BusinessController extends BaseController
             $businessConnectionId = $this->required($request, 'business_connection_id');
             $showGiftButton = $this->boolInput($request, 'show_gift_button');
 
+            $botId = $this->getBotId($token);
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->update([
                     'gift_settings' => json_encode([
                         'show_gift_button' => $showGiftButton,
@@ -158,8 +170,10 @@ class BusinessController extends BaseController
         try {
             $businessConnectionId = $this->required($request, 'business_connection_id');
 
+            $botId = $this->getBotId($token);
             $biz = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if (!$biz) {
@@ -191,6 +205,17 @@ class BusinessController extends BaseController
             $chatId = $this->required($request, 'chat_id');
             $messageId = $this->required($request, 'message_id');
 
+            // Validate that the business connection exists and belongs to the bot
+            $botId = $this->getBotId($token);
+            $business = $this->db->table('business_accounts')
+                ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
+                ->first();
+
+            if (!$business) {
+                return $this->error('Business connection not found', 404);
+            }
+
             $this->db->table('messages')
                 ->where('id', $messageId)
                 ->where('chat_id', $chatId)
@@ -220,8 +245,10 @@ class BusinessController extends BaseController
             }
 
             // Validate that the business connection exists and belongs to the bot
+            $botId = $this->getBotId($token);
             $business = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if (!$business) {
@@ -245,8 +272,10 @@ class BusinessController extends BaseController
         try {
             $businessConnectionId = $this->required($request, 'business_connection_id');
 
+            $botId = $this->getBotId($token);
             $biz = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if (!$biz) {
@@ -274,8 +303,10 @@ class BusinessController extends BaseController
             $userId = $this->required($request, 'user_id');
             $starCount = (int) $this->required($request, 'star_count');
 
+            $botId = $this->getBotId($token);
             $biz = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if (!$biz) {
@@ -312,8 +343,10 @@ class BusinessController extends BaseController
         try {
             $businessConnectionId = $this->required($request, 'business_connection_id');
 
+            $botId = $this->getBotId($token);
             $biz = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
+                ->where('user_id', $botId)
                 ->first();
 
             if (!$biz) {
@@ -341,5 +374,13 @@ class BusinessController extends BaseController
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         }
+    }
+
+    /**
+     * Get bot ID from token
+     */
+    private function getBotId(string $token): int
+    {
+        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
 }
