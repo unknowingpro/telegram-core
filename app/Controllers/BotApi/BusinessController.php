@@ -219,7 +219,7 @@ class BusinessController extends BaseController
                 }
             }
 
-            // Get the user ID from the business connection
+            // Validate that the business connection exists and belongs to the bot
             $business = $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
                 ->first();
@@ -228,18 +228,8 @@ class BusinessController extends BaseController
                 return $this->error('Business connection not found', 404);
             }
 
-            // Get the actual chat ID from the business connection
-            $chat = $this->db->table('chats')
-                ->where('id', $business['chat_id'])
-                ->first();
-
-            if (!$chat) {
-                // If chat not found, still return true as per Telegram API behavior
-                return $this->ok(true);
-            }
-
             $messageService = new MessageService();
-            $messageService->deleteMessages($chat['chat_id'], $messageIds);
+            $messageService->deleteMessages($chatId, $messageIds);
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
