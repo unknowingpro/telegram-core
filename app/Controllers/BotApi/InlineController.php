@@ -73,8 +73,11 @@ class InlineController extends BaseController
     {
         try {
             $userId = $this->required($request, 'user_id');
-            $buttonText = $this->required($request, 'text');
-            $keyboardType = $this->input($request, 'keyboard_type', 'inline');
+            $buttonRaw = $this->required($request, 'keyboard_button');
+            $button = is_string($buttonRaw) ? json_decode($buttonRaw, true) : $buttonRaw;
+            if (!is_array($button)) {
+                throw new \InvalidArgumentException('keyboard_button must be a valid JSON object');
+            }
 
             $id = 'keyboard_' . bin2hex(random_bytes(8));
 
@@ -82,17 +85,15 @@ class InlineController extends BaseController
                 'user_id' => $userId,
                 'query' => json_encode([
                     'type' => 'prepared_keyboard',
-                    'text' => $buttonText,
-                    'keyboard_type' => $keyboardType,
+                    'button' => $button,
                     'prepared_id' => $id,
                     'request_id' => $this->input($request, 'request_id'),
                     'request_data' => $this->input($request, 'request_data'),
-                    'button_data' => $this->input($request, 'button_data'),
                 ]),
                 'chat_type' => 'prepared_keyboard',
             ]);
 
-            return $this->ok(['id' => $id, 'text' => $buttonText]);
+            return $this->ok(['id' => $id]);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         }
