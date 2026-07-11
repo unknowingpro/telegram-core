@@ -102,6 +102,9 @@ class MessageModel extends BaseModel
             'content_data' => $original['content_data'],
             'entities' => $original['entities'],
             'forward_from_id' => $original['sender_id'],
+            'forward_from_chat_id' => $original['chat_id'],
+            'forward_from_message_id' => $original['id'],
+            'forward_date' => $original['created_at'] ?? date('Y-m-d H:i:s'),
         ];
 
         return $this->sendMessage($forwardData);
