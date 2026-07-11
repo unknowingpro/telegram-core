@@ -228,12 +228,15 @@ $router->group('/bot', function (Router $router) {
     $router->match(['GET', 'POST'], '/{token}/deleteBusinessMessages', 'App\Controllers\BotApi\BusinessController@deleteBusinessMessages');
     $router->match(['GET', 'POST'], '/{token}/getBusinessAccountStarBalance', 'App\Controllers\BotApi\BusinessController@getBusinessAccountStarBalance');
     $router->match(['GET', 'POST'], '/{token}/transferBusinessAccountStars', 'App\Controllers\BotApi\BusinessController@transferBusinessAccountStars');
+    $router->match(['GET', 'POST'], '/{token}/getBusinessAccountGifts', 'App\Controllers\BotApi\BusinessController@getBusinessAccountGifts');
 
     // ==================== STORIES ====================
     $router->match(['GET', 'POST'], '/{token}/postStory', 'App\Controllers\BotApi\StoriesController@postStory');
     $router->match(['GET', 'POST'], '/{token}/editStory', 'App\Controllers\BotApi\StoriesController@editStory');
     $router->match(['GET', 'POST'], '/{token}/deleteStory', 'App\Controllers\BotApi\StoriesController@deleteStory');
     $router->match(['GET', 'POST'], '/{token}/repostStory', 'App\Controllers\BotApi\StoriesController@repostStory');
+    $router->match(['GET', 'POST'], '/{token}/getStoryStatistics', 'App\Controllers\BotApi\StoriesController@getStoryStatistics');
+    $router->match(['GET', 'POST'], '/{token}/getUserStories', 'App\Controllers\BotApi\StoriesController@getUserStories');
 
     // ==================== MISCELLANEOUS ====================
     $router->match(['GET', 'POST'], '/{token}/answerChatJoinRequestQuery', 'App\Controllers\BotApi\MiscellaneousController@answerChatJoinRequestQuery');

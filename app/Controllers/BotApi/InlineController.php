@@ -23,6 +23,14 @@ class InlineController extends BaseController
             $resultsRaw = $this->required($request, 'results');
             $results = is_string($resultsRaw) ? json_decode($resultsRaw, true) : $resultsRaw;
 
+            // Store the answered inline query for audit
+            $this->db->table('inline_queries')->insert([
+                'user_id' => $this->getBotUserId($token),
+                'query' => json_encode($results),
+                'offset_val' => $this->input($request, 'next_offset'),
+                'chat_type' => $this->input($request, 'chat_type'),
+            ]);
+
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
@@ -34,7 +42,24 @@ class InlineController extends BaseController
      */
     public function savePreparedInlineMessage(Request $request, string $token): Response
     {
-        return $this->ok(['id' => 'prepared_' . md5(random_int(0, PHP_INT_MAX) . time())]);
+        try {
+            $userId = $this->required($request, 'user_id');
+            $resultRaw = $this->required($request, 'result');
+            $result = is_string($resultRaw) ? json_decode($resultRaw, true) : $resultRaw;
+
+            $id = 'prepared_' . bin2hex(random_bytes(8));
+
+            $this->db->table('inline_queries')->insert([
+                'user_id' => $userId,
+                'query' => json_encode(['type' => 'prepared_inline', 'result' => $result, 'prepared_id' => $id]),
+                'offset_val' => $this->input($request, 'allow_user_chats'),
+                'chat_type' => 'prepared',
+            ]);
+
+            return $this->ok(['id' => $id]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -42,7 +67,31 @@ class InlineController extends BaseController
      */
     public function savePreparedKeyboardButton(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $userId = $this->required($request, 'user_id');
+            $buttonText = $this->required($request, 'text');
+            $keyboardType = $this->input($request, 'keyboard_type', 'inline');
+
+            $id = 'keyboard_' . bin2hex(random_bytes(8));
+
+            $this->db->table('inline_queries')->insert([
+                'user_id' => $userId,
+                'query' => json_encode([
+                    'type' => 'prepared_keyboard',
+                    'text' => $buttonText,
+                    'keyboard_type' => $keyboardType,
+                    'prepared_id' => $id,
+                    'request_id' => $this->input($request, 'request_id'),
+                    'request_data' => $this->input($request, 'request_data'),
+                    'button_data' => $this->input($request, 'button_data'),
+                ]),
+                'chat_type' => 'prepared_keyboard',
+            ]);
+
+            return $this->ok(['id' => $id, 'text' => $buttonText]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -55,9 +104,22 @@ class InlineController extends BaseController
             $resultRaw = $this->required($request, 'result');
             $result = is_string($resultRaw) ? json_decode($resultRaw, true) : $resultRaw;
 
-            return $this->ok(['id' => 'webapp_' . md5(random_int(0, PHP_INT_MAX) . time())]);
+            $id = 'webapp_' . md5($webAppQueryId . time());
+
+            $this->db->table('inline_queries')->insert([
+                'user_id' => $this->getBotUserId($token),
+                'query' => json_encode(['type' => 'webapp_query', 'result' => $result, 'web_app_query_id' => $webAppQueryId]),
+                'chat_type' => 'webapp',
+            ]);
+
+            return $this->ok(['id' => $id]);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         }
+    }
+
+    private function getBotUserId(string $token): int
+    {
+        return (int) hexdec(substr(hash('sha256', $token), 0, 15));
     }
 }

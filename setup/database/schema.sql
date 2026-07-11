@@ -264,6 +264,16 @@ ALTER TABLE chats ADD COLUMN IF NOT EXISTS slow_mode_delay INT UNSIGNED NOT NULL
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS message_auto_delete_time INT UNSIGNED NULL;
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS has_protected_content BOOLEAN NOT NULL DEFAULT 0;
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS has_visible_history BOOLEAN NOT NULL DEFAULT 1;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS emoji_status_custom_emoji_id VARCHAR(64) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS emoji_status_expiration_date TIMESTAMP NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS added_to_attachment_menu BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS has_protected_content BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS allow_paid_broadcast BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS message_effect_id VARCHAR(64) NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS sticker_set_name VARCHAR(128) NULL;
+ALTER TABLE bot_accounts ADD COLUMN IF NOT EXISTS default_admin_rights TEXT NULL;
 
 -- =====================================================
 -- Bot Accounts (bots registered on this platform)

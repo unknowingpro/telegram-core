@@ -152,4 +152,16 @@ class ChatMemberModel extends BaseModel
             ->where('status', 'active')
             ->get();
     }
+
+    /**
+     * Update member by chat + user
+     */
+    public function updateMember(int|string $chatId, int|string $userId, array $data): bool
+    {
+        $member = $this->getMember($chatId, $userId);
+        if (!$member) {
+            return false;
+        }
+        return $this->update($member['id'], $data) > 0;
+    }
 }

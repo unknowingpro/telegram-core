@@ -18,8 +18,31 @@ class BotSettingsController extends BaseController
      */
     public function getMe(Request $request, string $token): Response
     {
+        $botId = $this->getBotId($token);
+        $bot = $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->first();
+
+        if ($bot) {
+            return $this->ok([
+                'id' => $botId,
+                'is_bot' => true,
+                'first_name' => $bot['name'] ?: 'Bot',
+                'last_name' => null,
+                'username' => $bot['username'] ?: 'bot',
+                'language_code' => 'en',
+                'is_premium' => false,
+                'added_to_attachment_menu' => false,
+                'can_join_groups' => (bool) $bot['can_join_groups'],
+                'can_read_all_group_messages' => (bool) $bot['can_read_all_group_messages'],
+                'supports_inline_queries' => (bool) $bot['supports_inline_queries'],
+                'can_connect_to_business' => (bool) $bot['can_connect_to_business'],
+                'has_main_web_app' => (bool) $bot['has_main_web_app'],
+            ]);
+        }
+
         return $this->ok([
-            'id' => $this->getBotId($token),
+            'id' => $botId,
             'is_bot' => true,
             'first_name' => 'Bot',
             'last_name' => null,
@@ -40,6 +63,17 @@ class BotSettingsController extends BaseController
      */
     public function logOut(Request $request, string $token): Response
     {
+        $botId = $this->getBotId($token);
+
+        // Invalidate bot sessions
+        $this->db->table('sessions')
+            ->where('user_id', $botId)
+            ->delete();
+
+        $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->update(['is_active' => false]);
+
         return $this->ok(true);
     }
 
@@ -48,6 +82,17 @@ class BotSettingsController extends BaseController
      */
     public function close(Request $request, string $token): Response
     {
+        $botId = $this->getBotId($token);
+
+        $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->update(['is_active' => false]);
+
+        // Clear all webhooks for this bot
+        $this->db->table('webhooks')
+            ->where('user_id', $botId)
+            ->delete();
+
         return $this->ok(true);
     }
 
@@ -56,7 +101,11 @@ class BotSettingsController extends BaseController
      */
     public function getMyName(Request $request, string $token): Response
     {
-        return $this->ok(['name' => 'Bot']);
+        $bot = $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->first();
+
+        return $this->ok(['name' => $bot['name'] ?? 'Bot']);
     }
 
     /**
@@ -64,7 +113,29 @@ class BotSettingsController extends BaseController
      */
     public function setMyName(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $name = $this->required($request, 'name');
+
+            $existing = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if ($existing) {
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['name' => $name]);
+            } else {
+                $this->db->table('bot_accounts')->insert([
+                    'user_id' => $this->getBotId($token),
+                    'token' => $token,
+                    'name' => $name,
+                ]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -72,7 +143,11 @@ class BotSettingsController extends BaseController
      */
     public function getMyDescription(Request $request, string $token): Response
     {
-        return $this->ok(['description' => '']);
+        $bot = $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->first();
+
+        return $this->ok(['description' => $bot['description'] ?? '']);
     }
 
     /**
@@ -80,7 +155,29 @@ class BotSettingsController extends BaseController
      */
     public function setMyDescription(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $description = $this->required($request, 'description');
+
+            $existing = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if ($existing) {
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['description' => $description]);
+            } else {
+                $this->db->table('bot_accounts')->insert([
+                    'user_id' => $this->getBotId($token),
+                    'token' => $token,
+                    'description' => $description,
+                ]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -88,7 +185,11 @@ class BotSettingsController extends BaseController
      */
     public function getMyShortDescription(Request $request, string $token): Response
     {
-        return $this->ok(['short_description' => '']);
+        $bot = $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->first();
+
+        return $this->ok(['short_description' => $bot['short_description'] ?? '']);
     }
 
     /**
@@ -96,7 +197,29 @@ class BotSettingsController extends BaseController
      */
     public function setMyShortDescription(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $shortDescription = $this->required($request, 'short_description');
+
+            $existing = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if ($existing) {
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['short_description' => $shortDescription]);
+            } else {
+                $this->db->table('bot_accounts')->insert([
+                    'user_id' => $this->getBotId($token),
+                    'token' => $token,
+                    'short_description' => $shortDescription,
+                ]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -125,12 +248,10 @@ class BotSettingsController extends BaseController
             $commands = is_string($commandsRaw) ? json_decode($commandsRaw, true) : $commandsRaw;
             $botId = $this->getBotId($token);
 
-            // Clear existing commands for this scope
             $this->db->table('bot_commands')
                 ->where('bot_id', $botId)
                 ->delete();
 
-            // Insert new commands
             foreach ($commands as $cmd) {
                 $this->db->table('bot_commands')->insert([
                     'bot_id' => $botId,
@@ -163,6 +284,15 @@ class BotSettingsController extends BaseController
      */
     public function getMyDefaultAdministratorRights(Request $request, string $token): Response
     {
+        $botId = $this->getBotId($token);
+        $bot = $this->db->table('bot_accounts')
+            ->where('token', $token)
+            ->first();
+
+        if ($bot && $bot['default_admin_rights'] ?? null) {
+            return $this->ok(json_decode($bot['default_admin_rights'], true));
+        }
+
         return $this->ok(null);
     }
 
@@ -171,7 +301,24 @@ class BotSettingsController extends BaseController
      */
     public function setMyDefaultAdministratorRights(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $rightsRaw = $this->required($request, 'rights');
+            $rights = is_string($rightsRaw) ? json_decode($rightsRaw, true) : $rightsRaw;
+
+            $existing = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if ($existing) {
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['default_admin_rights' => json_encode($rights)]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**

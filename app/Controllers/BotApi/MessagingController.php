@@ -867,11 +867,38 @@ class MessagingController extends BaseController
     }
 
     /**
-     * sendPaidMedia — Send paid media
+     * sendPaidMedia — Send paid media (requires Telegram Star)
      */
     public function sendPaidMedia(Request $request, string $token): Response
     {
-        return $this->ok(true); // Paid media requires Telegram Star integration
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $mediaRaw = $this->required($request, 'media');
+            $senderId = $this->getBotUserId($token);
+
+            $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
+            $starCount = (int) $this->input($request, 'star_count', 1);
+
+            $result = $this->messageService->sendMedia($chatId, $senderId, $media[0]['media'] ?? $media['media'] ?? '', 'paid_media', [
+                'caption' => $this->input($request, 'caption'),
+                'parse_mode' => $this->input($request, 'parse_mode'),
+                'caption_entities' => $this->input($request, 'caption_entities'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
+                'reply_markup' => $this->input($request, 'reply_markup'),
+                'media_data' => [
+                    'star_count' => $starCount,
+                    'media_items' => $media,
+                    'payload' => $this->input($request, 'payload'),
+                ],
+            ]);
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -879,7 +906,24 @@ class MessagingController extends BaseController
      */
     public function sendMessageDraft(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $text = $this->required($request, 'text');
+            $senderId = $this->getBotUserId($token);
+
+            $this->messageService->sendText($chatId, $senderId, $text, [
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'parse_mode' => $this->input($request, 'parse_mode', 'MarkdownV2'),
+                'entities' => $this->input($request, 'entities'),
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'reply_markup' => $this->input($request, 'reply_markup'),
+            ]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -887,7 +931,39 @@ class MessagingController extends BaseController
      */
     public function sendRichMessage(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $bodyRaw = $this->required($request, 'body');
+            $senderId = $this->getBotUserId($token);
+
+            $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
+
+            $result = $this->messageService->sendText($chatId, $senderId, '', [
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'reply_markup' => $this->input($request, 'reply_markup'),
+            ]);
+
+            // Update content_type to rich_message
+            $this->db->table('messages')
+                ->where('id', $result['message_id'])
+                ->update([
+                    'content_type' => 'rich_message',
+                    'content_data' => json_encode([
+                        'body' => $body,
+                        'style' => $this->input($request, 'style', 'card'),
+                        'background_color' => $this->input($request, 'background_color'),
+                        'header' => $this->input($request, 'header'),
+                        'footer' => $this->input($request, 'footer'),
+                    ]),
+                ]);
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -895,7 +971,27 @@ class MessagingController extends BaseController
      */
     public function editMessageChecklist(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $messageId = $this->required($request, 'message_id');
+            $itemsRaw = $this->required($request, 'items');
+            $items = is_string($itemsRaw) ? json_decode($itemsRaw, true) : $itemsRaw;
+
+            $this->db->table('messages')
+                ->where('id', $messageId)
+                ->where('chat_id', $chatId)
+                ->update([
+                    'content_data' => json_encode([
+                        'items' => $items,
+                        'updated_at' => time(),
+                    ]),
+                    'edit_date' => date('Y-m-d H:i:s'),
+                ]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -903,7 +999,40 @@ class MessagingController extends BaseController
      */
     public function sendChecklist(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $title = $this->required($request, 'title');
+            $itemsRaw = $this->required($request, 'items');
+            $senderId = $this->getBotUserId($token);
+
+            $items = is_string($itemsRaw) ? json_decode($itemsRaw, true) : $itemsRaw;
+
+            $result = $this->messageService->sendText($chatId, $senderId, $title, [
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'reply_markup' => $this->input($request, 'reply_markup'),
+            ]);
+
+            // Update content_type to checklist
+            $this->db->table('messages')
+                ->where('id', $result['message_id'])
+                ->update([
+                    'content_type' => 'checklist',
+                    'content_data' => json_encode([
+                        'title' => $title,
+                        'items' => $items,
+                        'header' => $this->input($request, 'header'),
+                        'footer' => $this->input($request, 'footer'),
+                        'allow_multiple_answers' => $this->boolInput($request, 'allow_multiple_answers'),
+                    ]),
+                ]);
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -911,7 +1040,33 @@ class MessagingController extends BaseController
      */
     public function sendRichMessageDraft(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $bodyRaw = $this->required($request, 'body');
+            $senderId = $this->getBotUserId($token);
+
+            $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
+
+            $result = $this->messageService->sendText($chatId, $senderId, '', [
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'disable_notification' => true,
+            ]);
+
+            $this->db->table('messages')
+                ->where('id', $result['message_id'])
+                ->update([
+                    'content_type' => 'rich_message',
+                    'content_data' => json_encode([
+                        'body' => $body,
+                        'is_draft' => true,
+                        'style' => $this->input($request, 'style', 'card'),
+                    ]),
+                ]);
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
