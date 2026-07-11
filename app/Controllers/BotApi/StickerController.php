@@ -163,16 +163,68 @@ class StickerController extends BaseController
             ]);
 
             foreach ($stickers as $i => $s) {
+                // Process sticker file - could be file_id string or uploaded file
+                $stickerFile = $s['sticker'] ?? null;
+                $fileId = null;
+
+                if (is_string($stickerFile)) {
+                    // Direct file_id provided
+                    $fileId = $stickerFile;
+                } elseif (!is_null($stickerFile)) {
+                    // File uploaded via multipart/form-data - process it
+                    $fileId = $this->resolveFileUpload($request, 'sticker', $userId, 'sticker_' . $i);
+                }
+
+                // Fallback to file_id field if sticker field not present or processing failed
+                if (is_null($fileId)) {
+                    $fileId = $s['sticker'] ?? $s['file_id'] ?? '';
+                }
+
+                // If file_id is provided, get file info from media table
+                if (!empty($fileId)) {
+                    $media = $this->db->table('media')
+                        ->where('file_id', $fileId)
+                        ->first();
+
+                    if ($media) {
+                        $fileInfo = [
+                            'file_id' => $media['file_id'],
+                            'file_unique_id' => $media['file_unique_id'],
+                            'file_size' => $media['file_size'] ?? 0,
+                            'width' => $media['width'] ?? 512,
+                            'height' => $media['height'] ?? 512,
+                        ];
+                    } else {
+                        // Fallback if media record not found
+                        $fileInfo = [
+                            'file_id' => $fileId,
+                            'file_unique_id' => '',
+                            'file_size' => 0,
+                            'width' => 512,
+                            'height' => 512,
+                        ];
+                    }
+                } else {
+                    // No file_id provided
+                    $fileInfo = [
+                        'file_id' => '',
+                        'file_unique_id' => '',
+                        'file_size' => 0,
+                        'width' => 512,
+                        'height' => 512,
+                    ];
+                }
+
                 $this->db->table('stickers')->insert([
                     'set_id' => $setId,
-                    'file_id' => $s['sticker'] ?? $s['file_id'] ?? '',
-                    'file_unique_id' => 'su_' . md5($s['sticker'] ?? $s['file_id'] ?? ''),
+                    'file_id' => $fileInfo['file_id'],
+                    'file_unique_id' => $fileInfo['file_unique_id'],
                     'type' => $s['type'] ?? $stickerType,
                     'emoji' => $s['emoji'] ?? null,
                     'position' => $i,
-                    'file_size' => 0,
-                    'width' => $s['width'] ?? 512,
-                    'height' => $s['height'] ?? 512,
+                    'file_size' => $fileInfo['file_size'],
+                    'width' => $fileInfo['width'],
+                    'height' => $fileInfo['height'],
                     'is_animated' => $stickerType === 'animated',
                     'is_video' => $stickerType === 'video',
                 ]);
@@ -204,15 +256,56 @@ class StickerController extends BaseController
                 ->where('set_id', $set['id'])
                 ->count();
 
+            // Get file_id from sticker object (could be 'sticker' or 'file_id' field)
+            $fileId = $sticker['sticker'] ?? $sticker['file_id'] ?? '';
+
+            // If file_id is provided, get file info from media table
+            if (!empty($fileId)) {
+                $media = $this->db->table('media')
+                    ->where('file_id', $fileId)
+                    ->first();
+
+                if ($media) {
+                    $fileInfo = [
+                        'file_id' => $media['file_id'],
+                        'file_unique_id' => $media['file_unique_id'],
+                        'file_size' => $media['file_size'] ?? 0,
+                        'width' => $media['width'] ?? 512,
+                        'height' => $media['height'] ?? 512,
+                    ];
+                } else {
+                    // Fallback if media record not found
+                    $fileInfo = [
+                        'file_id' => $fileId,
+                        'file_unique_id' => '',
+                        'file_size' => 0,
+                        'width' => 512,
+                        'height' => 512,
+                    ];
+                }
+            } else {
+                // No file_id provided
+                $fileInfo = [
+                    'file_id' => '',
+                    'file_unique_id' => '',
+                    'file_size' => 0,
+                    'width' => 512,
+                    'height' => 512,
+                ];
+            }
+
             $this->db->table('stickers')->insert([
                 'set_id' => $set['id'],
-                'file_id' => $sticker['sticker'] ?? '',
-                'file_unique_id' => 'su_' . md5($sticker['sticker'] ?? ''),
+                'file_id' => $fileInfo['file_id'],
+                'file_unique_id' => $fileInfo['file_unique_id'],
+                'type' => $sticker['type'] ?? $stickerType,
                 'emoji' => $sticker['emoji'] ?? null,
                 'position' => $maxPos,
-                'file_size' => 0,
-                'width' => $sticker['width'] ?? 512,
-                'height' => $sticker['height'] ?? 512,
+                'file_size' => $fileInfo['file_size'],
+                'width' => $fileInfo['width'],
+                'height' => $fileInfo['height'],
+                'is_animated' => $stickerType === 'animated',
+                'is_video' => $stickerType === 'video',
             ]);
 
             return $this->ok(true);
@@ -270,11 +363,66 @@ class StickerController extends BaseController
             $stickerRaw = $this->required($request, 'sticker');
             $sticker = is_string($stickerRaw) ? json_decode($stickerRaw, true) : $stickerRaw;
 
+            // Process sticker file - could be file_id string or uploaded file
+            $stickerFile = $sticker['sticker'] ?? null;
+            $fileId = null;
+
+            if (is_string($stickerFile)) {
+                // Direct file_id provided
+                $fileId = $stickerFile;
+            } elseif (!is_null($stickerFile)) {
+                // File uploaded via multipart/form-data - process it
+                $fileId = $this->resolveFileUpload($request, 'sticker', $userId, 'sticker');
+            }
+
+            // Fallback to file_id field if sticker field not present or processing failed
+            if (is_null($fileId)) {
+                $fileId = $sticker['sticker'] ?? $sticker['file_id'] ?? '';
+            }
+
+            // If file_id is provided, get file info from media table
+            if (!empty($fileId)) {
+                $media = $this->db->table('media')
+                    ->where('file_id', $fileId)
+                    ->first();
+
+                if ($media) {
+                    $fileInfo = [
+                        'file_id' => $media['file_id'],
+                        'file_unique_id' => $media['file_unique_id'],
+                        'file_size' => $media['file_size'] ?? 0,
+                        'width' => $media['width'] ?? 512,
+                        'height' => $media['height'] ?? 512,
+                    ];
+                } else {
+                    // Fallback if media record not found
+                    $fileInfo = [
+                        'file_id' => $fileId,
+                        'file_unique_id' => '',
+                        'file_size' => 0,
+                        'width' => 512,
+                        'height' => 512,
+                    ];
+                }
+            } else {
+                // No file_id provided
+                $fileInfo = [
+                    'file_id' => '',
+                    'file_unique_id' => '',
+                    'file_size' => 0,
+                    'width' => 512,
+                    'height' => 512,
+                ];
+            }
+
             $this->db->table('stickers')
                 ->where('file_id', $oldSticker)
                 ->update([
-                    'file_id' => $sticker['sticker'] ?? '',
+                    'file_id' => $fileInfo['file_id'],
+                    'file_unique_id' => $fileInfo['file_unique_id'],
+                    'type' => $sticker['type'] ?? null,
                     'emoji' => $sticker['emoji'] ?? null,
+                    // Note: We don't update position here as it's handled by setStickerPositionInSet
                 ]);
 
             return $this->ok(true);
@@ -394,6 +542,41 @@ class StickerController extends BaseController
             $this->db->table('stickers')
                 ->where('file_id', $sticker)
                 ->update(['mask_position' => json_encode($maskPosition)]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * deleteStickerSet — Delete sticker set
+     */
+    public function deleteStickerSet(Request $request, string $token): Response
+    {
+        try {
+            $userId = $this->required($request, 'user_id');
+            $name = $this->required($request, 'name');
+
+            // Verify that the set belongs to the user
+            $set = $this->db->table('sticker_sets')
+                ->where('name', $name)
+                ->where('owner_id', $userId)
+                ->first();
+
+            if (!$set) {
+                return $this->error('Sticker set not found or access denied', 404);
+            }
+
+            // Delete all stickers in the set
+            $this->db->table('stickers')
+                ->where('set_id', $set['id'])
+                ->delete();
+
+            // Delete the sticker set
+            $this->db->table('sticker_sets')
+                ->where('id', $set['id'])
+                ->delete();
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {

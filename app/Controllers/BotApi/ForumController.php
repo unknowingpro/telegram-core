@@ -27,6 +27,7 @@ class ForumController extends BaseController
                 'name' => $name,
                 'icon_color' => $this->intInput($request, 'icon_color'),
                 'icon_custom_emoji_id' => $this->input($request, 'icon_custom_emoji_id'),
+                'is_hidden' => 0,
             ]);
 
             return $this->ok([
@@ -55,6 +56,8 @@ class ForumController extends BaseController
             if ($this->input($request, 'icon_custom_emoji_id') !== null) {
                 $updates['icon_custom_emoji_id'] = $this->input($request, 'icon_custom_emoji_id');
             }
+            // Note: is_hidden can only be changed via hide/unhideGeneralForumTopic methods
+            // as per Telegram Bot API specification
 
             if (!empty($updates)) {
                 $this->db->table('forum_topics')
@@ -191,7 +194,7 @@ class ForumController extends BaseController
             $this->db->table('forum_topics')
                 ->where('chat_id', $chatId)
                 ->where('name', 'General')
-                ->update(['name' => 'General_hidden']); // mark as hidden
+                ->update(['is_hidden' => 1]);
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
@@ -209,8 +212,9 @@ class ForumController extends BaseController
 
             $this->db->table('forum_topics')
                 ->where('chat_id', $chatId)
-                ->where('name', 'General_hidden')
-                ->update(['name' => 'General']);
+                ->where('name', 'General')
+                ->where('is_hidden', 1)
+                ->update(['is_hidden' => 0]);
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
@@ -234,7 +238,7 @@ class ForumController extends BaseController
             if (!empty($updates)) {
                 $this->db->table('forum_topics')
                     ->where('chat_id', $chatId)
-                    ->where('name', 'LIKE', 'General%')
+                    ->where('name', 'General')
                     ->update($updates);
             }
 
@@ -254,7 +258,7 @@ class ForumController extends BaseController
 
             $this->db->table('forum_topics')
                 ->where('chat_id', $chatId)
-                ->where('name', 'LIKE', 'General%')
+                ->where('name', 'General')
                 ->update(['icon_color' => null]);
 
             return $this->ok(true);
@@ -273,7 +277,7 @@ class ForumController extends BaseController
 
             $this->db->table('forum_topics')
                 ->where('chat_id', $chatId)
-                ->where('name', 'LIKE', 'General%')
+                ->where('name', 'General')
                 ->update(['icon_color' => 0x6FB9F0]);
 
             return $this->ok(true);
@@ -290,9 +294,24 @@ class ForumController extends BaseController
         try {
             $chatId = $this->required($request, 'chat_id');
 
-            $this->db->table('pinned_messages')
+            // Get message IDs for the general topic (both hidden and visible)
+            $messageIds = $this->db->table('messages')
                 ->where('chat_id', $chatId)
-                ->delete();
+                ->whereIn('message_thread_id', function($query) use ($chatId) {
+                    $query->select('id')
+                        ->from('forum_topics')
+                        ->where('chat_id', $chatId)
+                        ->where('name', 'General');
+                })
+                ->pluck('id');
+
+            // Delete pinned messages for the general topic
+            if (!empty($messageIds)) {
+                $this->db->table('pinned_messages')
+                    ->where('chat_id', $chatId)
+                    ->whereIn('message_id', $messageIds)
+                    ->delete();
+            }
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
