@@ -1169,7 +1169,7 @@ class MessagingController extends BaseController
     }
 
     /**
-     * sendMessageDraft — Save a message as draft
+     * sendMessageDraft — Save a message as draft (without notifying users)
      */
     public function sendMessageDraft(Request $request, string $token): Response
     {
@@ -1178,7 +1178,7 @@ class MessagingController extends BaseController
             $text = $this->required($request, 'text');
             $senderId = $this->getBotUserId($token);
 
-            $this->messageService->sendText($chatId, $senderId, $text, [
+            $result = $this->messageService->sendText($chatId, $senderId, $text, [
                 'business_connection_id' => $this->input($request, 'business_connection_id'),
                 'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
                 'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
@@ -1186,7 +1186,7 @@ class MessagingController extends BaseController
                 'parse_mode' => $this->input($request, 'parse_mode', 'MarkdownV2'),
                 'entities' => $this->input($request, 'entities'),
                 'link_preview_options' => $this->input($request, 'link_preview_options'),
-                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'disable_notification' => true,
                 'protect_content' => $this->boolInput($request, 'protect_content'),
                 'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
                 'message_effect_id' => $this->input($request, 'message_effect_id'),
@@ -1194,7 +1194,20 @@ class MessagingController extends BaseController
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
 
-            return $this->ok(true);
+            // Mark as draft
+            $this->db->table('messages')
+                ->where('id', $result['message_id'])
+                ->update([
+                    'content_type' => 'draft',
+                    'content_data' => json_encode([
+                        'is_draft' => true,
+                        'original_text' => $text,
+                        'entities' => $this->input($request, 'entities'),
+                        'link_preview_options' => $this->input($request, 'link_preview_options'),
+                    ]),
+                ]);
+
+            return $this->ok($result);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         }

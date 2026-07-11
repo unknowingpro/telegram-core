@@ -259,7 +259,7 @@ ALTER TABLE messages CHANGE COLUMN content_type content_type ENUM(
     'text', 'photo', 'video', 'audio', 'document', 'sticker',
     'voice', 'video_note', 'location', 'contact', 'poll',
     'dice', 'game', 'animation', 'venue', 'invoice', 'live_photo',
-    'paid_media', 'checklist', 'rich_message'
+    'paid_media', 'checklist', 'rich_message', 'draft'
 ) NOT NULL DEFAULT 'text';
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS caption_entities JSON NULL;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS parse_mode VARCHAR(32) NULL;
