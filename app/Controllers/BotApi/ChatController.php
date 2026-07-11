@@ -114,7 +114,8 @@ class ChatController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $photo = $this->required($request, 'photo');
+            $botId = $this->getBotUserId($token);
+            $photo = $this->resolveFileUpload($request, 'photo', $botId) ?? $this->required($request, 'photo');
             $this->chatModel->update($chatId, ['photo_file_id' => $photo]);
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {

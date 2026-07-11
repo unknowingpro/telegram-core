@@ -151,27 +151,36 @@ class UserController extends BaseController
 
     /**
      * setMyProfilePhoto — Set bot profile photo
+     * Accepts InputProfilePhoto (object with type + photo/animation) or direct file_id / upload
      */
     public function setMyProfilePhoto(Request $request, string $token): Response
     {
         try {
-            $photo = $this->required($request, 'photo');
+            $photoRaw = $this->required($request, 'photo');
             $botId = $this->getBotUserId($token);
 
-            $this->db->table('media')->insert([
-                'user_id' => $botId,
-                'file_id' => $photo,
-                'file_unique_id' => 'unique_' . md5($photo),
-                'file_path' => null,
-                'file_size' => 0,
-                'mime_type' => 'image/jpeg',
-                'width' => 640,
-                'height' => 640,
-            ]);
+            $photo = is_string($photoRaw) ? json_decode($photoRaw, true) : $photoRaw;
+
+            // Handle InputProfilePhoto object
+            if (is_array($photo)) {
+                $profileType = $photo['type'] ?? 'static';
+                $mediaField = $profileType === 'animated' ? 'animation' : 'photo';
+                $mediaValue = $photo[$mediaField] ?? '';
+
+                if (is_string($mediaValue) && !str_starts_with($mediaValue, 'attach://')) {
+                    $fileId = $mediaValue;
+                } else {
+                    $fileId = $this->resolveFileUpload($request, $mediaField, $botId) ?? $mediaValue;
+                }
+            } else {
+                // Direct file_id or file upload
+                $uploaded = $this->resolveFileUpload($request, 'photo', $botId);
+                $fileId = $uploaded ?? $photo;
+            }
 
             $this->db->table('users')
                 ->where('id', $botId)
-                ->update(['avatar_file_id' => $photo]);
+                ->update(['avatar_file_id' => $fileId]);
 
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
