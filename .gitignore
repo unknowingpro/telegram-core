@@ -33,6 +33,7 @@ Thumbs.db
 # Documentation - not for repo
 /docs/
 
+# Claude / AI tools
 /.claude/
 
 # Test & temp files
