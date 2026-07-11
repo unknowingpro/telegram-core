@@ -322,6 +322,176 @@ class BotSettingsController extends BaseController
     }
 
     /**
+     * getMyDefaultChatAdministratorRights — Get default chat administrator rights
+     */
+    public function getMyDefaultChatAdministratorRights(Request $request, string $token): Response
+    {
+        try {
+            $bot = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if (!$bot) {
+                return $this->error('Bot not found', 404);
+            }
+
+            $defaultRights = json_decode($bot['default_chat_admin_rights'] ?? 'true', true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $defaultRights = true; // fallback to enabled if invalid JSON
+            }
+
+            // Ensure we return proper boolean values for all expected fields
+            $defaults = [
+                'can_change_info' => true,
+                'can_post_messages' => true,
+                'can_edit_messages' => true,
+                'can_delete_messages' => true,
+                'can_post_stories' => true,
+                'can_edit_stories' => true,
+                'can_delete_stories' => true,
+                'can_invite_users' => true,
+                'can_manage_topics' => true,
+                'can_pin_messages' => true,
+                'can_manage_video_chats' => true,
+                'can_restrict_members' => true,
+                'can_promote_members' => true,
+                'can_manage_chat' => true,
+            ];
+
+            // Merge with stored rights, keeping defaults for missing keys
+            $result = array_merge($defaults, array_intersect_key($defaultRights, $defaults));
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * setMyDefaultChatAdministratorRights — Set default chat administrator rights
+     */
+    public function setMyDefaultChatAdministratorRights(Request $request, string $token): Response
+    {
+        try {
+            $rights = $this->input($request, 'rights');
+            $isNull = $this->input($request, 'rights') === null;
+
+            $bot = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if (!$bot) {
+                return $this->error('Bot not found', 404);
+            }
+
+            if ($isNull) {
+                // Reset to default (all true)
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['default_chat_admin_rights' => null]);
+            } else {
+                // Validate that rights is an object
+                if (!is_array($rights)) {
+                    return $this->error('Rights must be a JSON object', 400);
+                }
+
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['default_chat_admin_rights' => json_encode($rights)]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * getMyDefaultChatPermissions — Get default chat permissions
+     */
+    public function getMyDefaultChatPermissions(Request $request, string $token): Response
+    {
+        try {
+            $bot = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if (!$bot) {
+                return $this->error('Bot not found', 404);
+            }
+
+            $defaultPermissions = json_decode($bot['default_chat_permissions'] ?? 'true', true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $defaultPermissions = true; // fallback to enabled if invalid JSON
+            }
+
+            // Ensure we return proper boolean values for all expected fields
+            $defaults = [
+                'can_send_messages' => true,
+                'can_send_audios' => true,
+                'can_send_documents' => true,
+                'can_send_photos' => true,
+                'can_send_videos' => true,
+                'can_send_video_notes' => true,
+                'can_send_voice_notes' => true,
+                'can_send_polls' => true,
+                'can_send_other_messages' => true,
+                'can_add_web_page_previews' => true,
+                'can_change_info' => true,
+                'can_invite_users' => true,
+                'can_pin_messages' => true,
+                'can_manage_topics' => true,
+            ];
+
+            // Merge with stored permissions, keeping defaults for missing keys
+            $result = array_merge($defaults, array_intersect_key($defaultPermissions, $defaults));
+
+            return $this->ok($result);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * setMyDefaultChatPermissions — Set default chat permissions
+     */
+    public function setMyDefaultChatPermissions(Request $request, string $token): Response
+    {
+        try {
+            $permissions = $this->input($request, 'permissions');
+            $isNull = $this->input($request, 'permissions') === null;
+
+            $bot = $this->db->table('bot_accounts')
+                ->where('token', $token)
+                ->first();
+
+            if (!$bot) {
+                return $this->error('Bot not found', 404);
+            }
+
+            if ($isNull) {
+                // Reset to default (all true)
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['default_chat_permissions' => null]);
+            } else {
+                // Validate that permissions is an object
+                if (!is_array($permissions)) {
+                    return $this->error('Permissions must be a JSON object', 400);
+                }
+
+                $this->db->table('bot_accounts')
+                    ->where('token', $token)
+                    ->update(['default_chat_permissions' => json_encode($permissions)]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
      * Get bot ID from token
      */
     private function getBotId(string $token): int
