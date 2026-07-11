@@ -42,7 +42,23 @@ class UpdateModel extends BaseModel
             ->where('is_read', false);
 
         if ($offset > 0) {
+            // Positive offset: return updates with ID greater than offset
             $query = $query->where('id', '>', $offset);
+        } elseif ($offset < 0) {
+            // Negative offset: retrieve updates starting from -offset from the end
+            // All prior updates are forgotten (mark them as read)
+            $latestId = $this->getLatestUpdateId($userId);
+            $startFrom = max(0, $latestId + $offset + 1);
+            $query = $query->where('id', '>=', $startFrom);
+
+            // Mark all updates before the start as read
+            if ($startFrom > 0) {
+                $this->db->raw(
+                    "UPDATE {$this->table} SET is_read = true
+                     WHERE user_id = ? AND id < ?",
+                    [$userId, $startFrom]
+                );
+            }
         }
 
         $updates = $query->orderBy('id', 'ASC')
