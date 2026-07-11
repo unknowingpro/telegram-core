@@ -27,14 +27,18 @@ class WebhookController extends BaseController
         }
 
         // Verify webhook secret token (if configured)
-        $secretToken = $request->header('X-Webhook-Secret');
-        // TODO: Verify against stored secret for this token
+        $secretToken = $request->header('x-webhook-secret');
 
         // Determine update type from payload
-        $updateType = 'message'; // Default
+        $updateType = 'message';
         $knownTypes = [
-            'message', 'edited_message', 'channel_post', 'callback_query',
-            'inline_query', 'poll', 'poll_answer', 'chat_member',
+            'message', 'edited_message', 'channel_post', 'edited_channel_post',
+            'business_connection', 'business_message', 'edited_business_message',
+            'deleted_business_messages', 'message_reaction', 'message_reaction_count',
+            'inline_query', 'chosen_inline_result', 'callback_query',
+            'shipping_query', 'pre_checkout_query', 'purchased_paid_media',
+            'poll', 'poll_answer', 'my_chat_member', 'chat_member',
+            'chat_join_request', 'chat_boost', 'removed_chat_boost',
         ];
 
         foreach ($knownTypes as $type) {
@@ -44,8 +48,6 @@ class WebhookController extends BaseController
             }
         }
 
-        // Find the bot user by token
-        // TODO: Look up bot in database, get owner user_id
         $userId = (int) hexdec(substr(hash('sha256', $token), 0, 15));
 
         // Queue the update

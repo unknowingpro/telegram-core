@@ -86,7 +86,7 @@ class MessageModel extends BaseModel
         int|string $fromChatId,
         int|string $toChatId,
         int|string $messageId,
-        ?int|string $fromUserId = null
+        int|string|null $fromUserId = null
     ): ?string {
         $original = $this->getMessage($fromChatId, $messageId);
         if (!$original) {
@@ -113,6 +113,65 @@ class MessageModel extends BaseModel
     public function countChatMessages(int|string $chatId): int
     {
         return $this->count(['chat_id' => $chatId]);
+    }
+
+    /**
+     * Upsert a reaction for a message
+     */
+    public function upsertReaction(int|string $messageId, ?array $reaction, bool $isBig = false): bool
+    {
+        if ($reaction === null) {
+            return $this->db->table('message_reactions')
+                ->where('message_id', $messageId)
+                ->delete() > 0;
+        }
+
+        $type = $reaction['type'] ?? 'emoji';
+        $emoji = $reaction['emoji'] ?? null;
+        $customEmojiId = $reaction['custom_emoji_id'] ?? null;
+
+        $existing = $this->db->table('message_reactions')
+            ->where('message_id', $messageId)
+            ->first();
+
+        if ($existing) {
+            return $this->db->table('message_reactions')
+                ->where('message_id', $messageId)
+                ->update([
+                    'reaction_type' => $type,
+                    'emoji' => $emoji,
+                    'custom_emoji_id' => $customEmojiId,
+                ]) > 0;
+        }
+
+        return $this->db->table('message_reactions')->insert([
+            'message_id' => $messageId,
+            'user_id' => 0,
+            'reaction_type' => $type,
+            'emoji' => $emoji,
+            'custom_emoji_id' => $customEmojiId,
+        ]) > 0;
+    }
+
+    /**
+     * Delete a reaction by user
+     */
+    public function deleteReaction(int|string $messageId, int|string $userId): bool
+    {
+        return $this->db->table('message_reactions')
+            ->where('message_id', $messageId)
+            ->where('user_id', $userId)
+            ->delete() > 0;
+    }
+
+    /**
+     * Delete all reactions for a message
+     */
+    public function deleteAllReactions(int|string $messageId): bool
+    {
+        return $this->db->table('message_reactions')
+            ->where('message_id', $messageId)
+            ->delete() > 0;
     }
 
     /**

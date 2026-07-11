@@ -67,7 +67,26 @@ class Router
             'middleware' => end($this->middleware) ?? [],
         ];
 
+        // Auto-register /bot{token}/method alt for /bot/{token}/method (Telegram format)
+        if (preg_match('#^/(bot)/\{(\w+)\}/#', $fullPath, $m)) {
+            $altPath = '/' . $m[1] . '{' . $m[2] . '}/' . substr($fullPath, strlen($m[0]));
+            $this->routes[] = [
+                'method' => $method,
+                'path' => $altPath,
+                'handler' => $handler,
+                'middleware' => end($this->middleware) ?? [],
+            ];
+        }
+
         return $this;
+    }
+
+    /**
+     * Register routes for all methods
+     */
+    public function any(string $path, string $handler): self
+    {
+        return $this->match(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], $path, $handler);
     }
 
     /**

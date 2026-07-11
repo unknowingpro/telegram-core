@@ -19,172 +19,239 @@ $router->group('/api', function (Router $router) {
 
 }, [RateLimitMiddleware::class]);
 
-// Bot API routes (mirror of Telegram Bot API)
-// Pattern: /api/bot{token}/{method}
-$router->group('/api/bot', function (Router $router) {
+// Bot API routes - Telegram mirror
+// All methods support both POST and GET (Telegram clients use either)
+$router->group('/bot', function (Router $router) {
 
-    // === Core Bot Methods ===
-    $router->post('/{token}/getMe', 'App\Controllers\BotApi\BotSettingsController@getMe');
-    $router->post('/{token}/logOut', 'App\Controllers\BotApi\BotSettingsController@logOut');
-    $router->post('/{token}/close', 'App\Controllers\BotApi\BotSettingsController@close');
-    $router->post('/{token}/getMyName', 'App\Controllers\BotApi\BotSettingsController@getMyName');
-    $router->post('/{token}/setMyName', 'App\Controllers\BotApi\BotSettingsController@setMyName');
-    $router->post('/{token}/getMyDescription', 'App\Controllers\BotApi\BotSettingsController@getMyDescription');
-    $router->post('/{token}/setMyDescription', 'App\Controllers\BotApi\BotSettingsController@setMyDescription');
-    $router->post('/{token}/getMyShortDescription', 'App\Controllers\BotApi\BotSettingsController@getMyShortDescription');
-    $router->post('/{token}/setMyShortDescription', 'App\Controllers\BotApi\BotSettingsController@setMyShortDescription');
-    $router->post('/{token}/getMyCommands', 'App\Controllers\BotApi\BotSettingsController@getMyCommands');
-    $router->post('/{token}/setMyCommands', 'App\Controllers\BotApi\BotSettingsController@setMyCommands');
-    $router->post('/{token}/deleteMyCommands', 'App\Controllers\BotApi\BotSettingsController@deleteMyCommands');
-    $router->post('/{token}/getMyDefaultAdministratorRights', 'App\Controllers\BotApi\BotSettingsController@getMyDefaultAdministratorRights');
-    $router->post('/{token}/setMyDefaultAdministratorRights', 'App\Controllers\BotApi\BotSettingsController@setMyDefaultAdministratorRights');
+    // ==================== GET ME / BOT SETTINGS ====================
+    $router->match(['GET', 'POST'], '/{token}/getMe', 'App\Controllers\BotApi\BotSettingsController@getMe');
+    $router->match(['GET', 'POST'], '/{token}/logOut', 'App\Controllers\BotApi\BotSettingsController@logOut');
+    $router->match(['GET', 'POST'], '/{token}/close', 'App\Controllers\BotApi\BotSettingsController@close');
 
-    // === Update Methods ===
-    $router->post('/{token}/getUpdates', 'App\Controllers\BotApi\UpdateController@getUpdates');
-    $router->post('/{token}/setWebhook', 'App\Controllers\BotApi\UpdateController@setWebhook');
-    $router->post('/{token}/deleteWebhook', 'App\Controllers\BotApi\UpdateController@deleteWebhook');
-    $router->post('/{token}/getWebhookInfo', 'App\Controllers\BotApi\UpdateController@getWebhookInfo');
+    // ==================== BOT NAME / DESCRIPTION ====================
+    $router->match(['GET', 'POST'], '/{token}/getMyName', 'App\Controllers\BotApi\BotSettingsController@getMyName');
+    $router->match(['GET', 'POST'], '/{token}/setMyName', 'App\Controllers\BotApi\BotSettingsController@setMyName');
+    $router->match(['GET', 'POST'], '/{token}/getMyDescription', 'App\Controllers\BotApi\BotSettingsController@getMyDescription');
+    $router->match(['GET', 'POST'], '/{token}/setMyDescription', 'App\Controllers\BotApi\BotSettingsController@setMyDescription');
+    $router->match(['GET', 'POST'], '/{token}/getMyShortDescription', 'App\Controllers\BotApi\BotSettingsController@getMyShortDescription');
+    $router->match(['GET', 'POST'], '/{token}/setMyShortDescription', 'App\Controllers\BotApi\BotSettingsController@setMyShortDescription');
 
-    // === Messaging Methods ===
-    $router->post('/{token}/sendMessage', 'App\Controllers\BotApi\MessagingController@sendMessage');
-    $router->post('/{token}/forwardMessage', 'App\Controllers\BotApi\MessagingController@forwardMessage');
-    $router->post('/{token}/forwardMessages', 'App\Controllers\BotApi\MessagingController@forwardMessages');
-    $router->post('/{token}/copyMessage', 'App\Controllers\BotApi\MessagingController@copyMessage');
-    $router->post('/{token}/copyMessages', 'App\Controllers\BotApi\MessagingController@copyMessages');
-    $router->post('/{token}/sendPhoto', 'App\Controllers\BotApi\MessagingController@sendPhoto');
-    $router->post('/{token}/sendAudio', 'App\Controllers\BotApi\MessagingController@sendAudio');
-    $router->post('/{token}/sendDocument', 'App\Controllers\BotApi\MessagingController@sendDocument');
-    $router->post('/{token}/sendVideo', 'App\Controllers\BotApi\MessagingController@sendVideo');
-    $router->post('/{token}/sendAnimation', 'App\Controllers\BotApi\MessagingController@sendAnimation');
-    $router->post('/{token}/sendVoice', 'App\Controllers\BotApi\MessagingController@sendVoice');
-    $router->post('/{token}/sendVideoNote', 'App\Controllers\BotApi\MessagingController@sendVideoNote');
-    $router->post('/{token}/sendLocation', 'App\Controllers\BotApi\MessagingController@sendLocation');
-    $router->post('/{token}/sendVenue', 'App\Controllers\BotApi\MessagingController@sendVenue');
-    $router->post('/{token}/sendContact', 'App\Controllers\BotApi\MessagingController@sendContact');
-    $router->post('/{token}/sendDice', 'App\Controllers\BotApi\MessagingController@sendDice');
-    $router->post('/{token}/sendPoll', 'App\Controllers\BotApi\MessagingController@sendPoll');
-    $router->post('/{token}/sendChecklist', 'App\Controllers\BotApi\MessagingController@sendChecklist');
-    $router->post('/{token}/sendChatAction', 'App\Controllers\BotApi\MessagingController@sendChatAction');
-    $router->post('/{token}/sendMediaGroup', 'App\Controllers\BotApi\MessagingController@sendMediaGroup');
-    $router->post('/{token}/sendMessageDraft', 'App\Controllers\BotApi\MessagingController@sendMessageDraft');
-    $router->post('/{token}/sendRichMessage', 'App\Controllers\BotApi\MessagingController@sendRichMessage');
+    // ==================== BOT COMMANDS ====================
+    $router->match(['GET', 'POST'], '/{token}/getMyCommands', 'App\Controllers\BotApi\BotSettingsController@getMyCommands');
+    $router->match(['GET', 'POST'], '/{token}/setMyCommands', 'App\Controllers\BotApi\BotSettingsController@setMyCommands');
+    $router->match(['GET', 'POST'], '/{token}/deleteMyCommands', 'App\Controllers\BotApi\BotSettingsController@deleteMyCommands');
 
-    // === Edit Methods ===
-    $router->post('/{token}/editMessageText', 'App\Controllers\BotApi\MessagingController@editMessageText');
-    $router->post('/{token}/editMessageCaption', 'App\Controllers\BotApi\MessagingController@editMessageCaption');
-    $router->post('/{token}/editMessageMedia', 'App\Controllers\BotApi\MessagingController@editMessageMedia');
-    $router->post('/{token}/editMessageReplyMarkup', 'App\Controllers\BotApi\MessagingController@editMessageReplyMarkup');
-    $router->post('/{token}/editMessageLiveLocation', 'App\Controllers\BotApi\MessagingController@editMessageLiveLocation');
-    $router->post('/{token}/stopMessageLiveLocation', 'App\Controllers\BotApi\MessagingController@stopMessageLiveLocation');
-    $router->post('/{token}/editMessageChecklist', 'App\Controllers\BotApi\MessagingController@editMessageChecklist');
+    // ==================== BOT ADMIN RIGHTS ====================
+    $router->match(['GET', 'POST'], '/{token}/getMyDefaultAdministratorRights', 'App\Controllers\BotApi\BotSettingsController@getMyDefaultAdministratorRights');
+    $router->match(['GET', 'POST'], '/{token}/setMyDefaultAdministratorRights', 'App\Controllers\BotApi\BotSettingsController@setMyDefaultAdministratorRights');
 
-    // === Delete Methods ===
-    $router->post('/{token}/deleteMessage', 'App\Controllers\BotApi\MessagingController@deleteMessage');
-    $router->post('/{token}/deleteMessages', 'App\Controllers\BotApi\MessagingController@deleteMessages');
+    // ==================== UPDATES ====================
+    $router->match(['GET', 'POST'], '/{token}/getUpdates', 'App\Controllers\BotApi\UpdateController@getUpdates');
+    $router->match(['GET', 'POST'], '/{token}/setWebhook', 'App\Controllers\BotApi\UpdateController@setWebhook');
+    $router->match(['GET', 'POST'], '/{token}/deleteWebhook', 'App\Controllers\BotApi\UpdateController@deleteWebhook');
+    $router->match(['GET', 'POST'], '/{token}/getWebhookInfo', 'App\Controllers\BotApi\UpdateController@getWebhookInfo');
 
-    // === Reaction Methods ===
-    $router->post('/{token}/setMessageReaction', 'App\Controllers\BotApi\MessagingController@setMessageReaction');
-    $router->post('/{token}/deleteMessageReaction', 'App\Controllers\BotApi\MessagingController@deleteMessageReaction');
-    $router->post('/{token}/deleteAllMessageReactions', 'App\Controllers\BotApi\MessagingController@deleteAllMessageReactions');
+    // ==================== SEND MESSAGES ====================
+    $router->match(['GET', 'POST'], '/{token}/sendMessage', 'App\Controllers\BotApi\MessagingController@sendMessage');
+    $router->match(['GET', 'POST'], '/{token}/sendPhoto', 'App\Controllers\BotApi\MessagingController@sendPhoto');
+    $router->match(['GET', 'POST'], '/{token}/sendAudio', 'App\Controllers\BotApi\MessagingController@sendAudio');
+    $router->match(['GET', 'POST'], '/{token}/sendDocument', 'App\Controllers\BotApi\MessagingController@sendDocument');
+    $router->match(['GET', 'POST'], '/{token}/sendVideo', 'App\Controllers\BotApi\MessagingController@sendVideo');
+    $router->match(['GET', 'POST'], '/{token}/sendAnimation', 'App\Controllers\BotApi\MessagingController@sendAnimation');
+    $router->match(['GET', 'POST'], '/{token}/sendVoice', 'App\Controllers\BotApi\MessagingController@sendVoice');
+    $router->match(['GET', 'POST'], '/{token}/sendVideoNote', 'App\Controllers\BotApi\MessagingController@sendVideoNote');
+    $router->match(['GET', 'POST'], '/{token}/sendLocation', 'App\Controllers\BotApi\MessagingController@sendLocation');
+    $router->match(['GET', 'POST'], '/{token}/sendVenue', 'App\Controllers\BotApi\MessagingController@sendVenue');
+    $router->match(['GET', 'POST'], '/{token}/sendContact', 'App\Controllers\BotApi\MessagingController@sendContact');
+    $router->match(['GET', 'POST'], '/{token}/sendDice', 'App\Controllers\BotApi\MessagingController@sendDice');
+    $router->match(['GET', 'POST'], '/{token}/sendPoll', 'App\Controllers\BotApi\MessagingController@sendPoll');
+    $router->match(['GET', 'POST'], '/{token}/sendChecklist', 'App\Controllers\BotApi\MessagingController@sendChecklist');
+    $router->match(['GET', 'POST'], '/{token}/sendChatAction', 'App\Controllers\BotApi\MessagingController@sendChatAction');
+    $router->match(['GET', 'POST'], '/{token}/sendMediaGroup', 'App\Controllers\BotApi\MessagingController@sendMediaGroup');
+    $router->match(['GET', 'POST'], '/{token}/sendMessageDraft', 'App\Controllers\BotApi\MessagingController@sendMessageDraft');
+    $router->match(['GET', 'POST'], '/{token}/sendRichMessage', 'App\Controllers\BotApi\MessagingController@sendRichMessage');
+    $router->match(['GET', 'POST'], '/{token}/sendSticker', 'App\Controllers\BotApi\MessagingController@sendSticker');
+    $router->match(['GET', 'POST'], '/{token}/sendLivePhoto', 'App\Controllers\BotApi\MessagingController@sendLivePhoto');
+    $router->match(['GET', 'POST'], '/{token}/sendPaidMedia', 'App\Controllers\BotApi\MessagingController@sendPaidMedia');
+    $router->match(['GET', 'POST'], '/{token}/sendRichMessageDraft', 'App\Controllers\BotApi\MessagingController@sendRichMessageDraft');
 
-    // === Chat Management ===
-    $router->post('/{token}/getChat', 'App\Controllers\BotApi\ChatController@getChat');
-    $router->post('/{token}/getChatAdministrators', 'App\Controllers\BotApi\ChatController@getChatAdministrators');
-    $router->post('/{token}/getChatMember', 'App\Controllers\BotApi\ChatController@getChatMember');
-    $router->post('/{token}/getChatMemberCount', 'App\Controllers\BotApi\ChatController@getChatMemberCount');
-    $router->post('/{token}/setChatTitle', 'App\Controllers\BotApi\ChatController@setChatTitle');
-    $router->post('/{token}/setChatDescription', 'App\Controllers\BotApi\ChatController@setChatDescription');
-    $router->post('/{token}/setChatPhoto', 'App\Controllers\BotApi\ChatController@setChatPhoto');
-    $router->post('/{token}/deleteChatPhoto', 'App\Controllers\BotApi\ChatController@deleteChatPhoto');
-    $router->post('/{token}/setChatPermissions', 'App\Controllers\BotApi\ChatController@setChatPermissions');
-    $router->post('/{token}/setChatAdministratorCustomTitle', 'App\Controllers\BotApi\ChatController@setChatAdministratorCustomTitle');
-    $router->post('/{token}/pinChatMessage', 'App\Controllers\BotApi\ChatController@pinChatMessage');
-    $router->post('/{token}/unpinChatMessage', 'App\Controllers\BotApi\ChatController@unpinChatMessage');
-    $router->post('/{token}/unpinAllChatMessages', 'App\Controllers\BotApi\ChatController@unpinAllChatMessages');
-    $router->post('/{token}/banChatMember', 'App\Controllers\BotApi\ChatController@banChatMember');
-    $router->post('/{token}/unbanChatMember', 'App\Controllers\BotApi\ChatController@unbanChatMember');
-    $router->post('/{token}/restrictChatMember', 'App\Controllers\BotApi\ChatController@restrictChatMember');
-    $router->post('/{token}/promoteChatMember', 'App\Controllers\BotApi\ChatController@promoteChatMember');
-    $router->post('/{token}/setChatMenuButton', 'App\Controllers\BotApi\ChatController@setChatMenuButton');
-    $router->post('/{token}/getChatMenuButton', 'App\Controllers\BotApi\ChatController@getChatMenuButton');
-    $router->post('/{token}/exportChatInviteLink', 'App\Controllers\BotApi\ChatController@exportChatInviteLink');
-    $router->post('/{token}/createChatInviteLink', 'App\Controllers\BotApi\ChatController@createChatInviteLink');
-    $router->post('/{token}/editChatInviteLink', 'App\Controllers\BotApi\ChatController@editChatInviteLink');
-    $router->post('/{token}/revokeChatInviteLink', 'App\Controllers\BotApi\ChatController@revokeChatInviteLink');
-    $router->post('/{token}/approveChatJoinRequest', 'App\Controllers\BotApi\ChatController@approveChatJoinRequest');
-    $router->post('/{token}/declineChatJoinRequest', 'App\Controllers\BotApi\ChatController@declineChatJoinRequest');
-    $router->post('/{token}/leaveChat', 'App\Controllers\BotApi\ChatController@leaveChat');
-    $router->post('/{token}/setChatStickerSet', 'App\Controllers\BotApi\ChatController@setChatStickerSet');
-    $router->post('/{token}/deleteChatStickerSet', 'App\Controllers\BotApi\ChatController@deleteChatStickerSet');
+    // ==================== FORWARD & COPY ====================
+    $router->match(['GET', 'POST'], '/{token}/forwardMessage', 'App\Controllers\BotApi\MessagingController@forwardMessage');
+    $router->match(['GET', 'POST'], '/{token}/forwardMessages', 'App\Controllers\BotApi\MessagingController@forwardMessages');
+    $router->match(['GET', 'POST'], '/{token}/copyMessage', 'App\Controllers\BotApi\MessagingController@copyMessage');
+    $router->match(['GET', 'POST'], '/{token}/copyMessages', 'App\Controllers\BotApi\MessagingController@copyMessages');
 
-    // === User Methods ===
-    $router->post('/{token}/getUserProfilePhotos', 'App\Controllers\BotApi\UserController@getUserProfilePhotos');
-    $router->post('/{token}/getUserProfileAudios', 'App\Controllers\BotApi\UserController@getUserProfileAudios');
-    $router->post('/{token}/setUserEmojiStatus', 'App\Controllers\BotApi\UserController@setUserEmojiStatus');
-    $router->post('/{token}/removeUserVerification', 'App\Controllers\BotApi\UserController@removeUserVerification');
-    $router->post('/{token}/removeChatVerification', 'App\Controllers\BotApi\UserController@removeChatVerification');
-    $router->post('/{token}/verifyUser', 'App\Controllers\BotApi\UserController@verifyUser');
-    $router->post('/{token}/verifyChat', 'App\Controllers\BotApi\UserController@verifyChat');
-    $router->post('/{token}/setMyProfilePhoto', 'App\Controllers\BotApi\UserController@setMyProfilePhoto');
-    $router->post('/{token}/removeMyProfilePhoto', 'App\Controllers\BotApi\UserController@removeMyProfilePhoto');
+    // ==================== EDIT MESSAGES ====================
+    $router->match(['GET', 'POST'], '/{token}/editMessageText', 'App\Controllers\BotApi\MessagingController@editMessageText');
+    $router->match(['GET', 'POST'], '/{token}/editMessageCaption', 'App\Controllers\BotApi\MessagingController@editMessageCaption');
+    $router->match(['GET', 'POST'], '/{token}/editMessageMedia', 'App\Controllers\BotApi\MessagingController@editMessageMedia');
+    $router->match(['GET', 'POST'], '/{token}/editMessageReplyMarkup', 'App\Controllers\BotApi\MessagingController@editMessageReplyMarkup');
+    $router->match(['GET', 'POST'], '/{token}/editMessageLiveLocation', 'App\Controllers\BotApi\MessagingController@editMessageLiveLocation');
+    $router->match(['GET', 'POST'], '/{token}/stopMessageLiveLocation', 'App\Controllers\BotApi\MessagingController@stopMessageLiveLocation');
+    $router->match(['GET', 'POST'], '/{token}/editMessageChecklist', 'App\Controllers\BotApi\MessagingController@editMessageChecklist');
+    $router->match(['GET', 'POST'], '/{token}/stopPoll', 'App\Controllers\BotApi\MessagingController@stopPoll');
 
-    // === Callback ===
-    $router->post('/{token}/answerCallbackQuery', 'App\Controllers\BotApi\CallbackController@answerCallbackQuery');
+    // ==================== DELETE MESSAGES ====================
+    $router->match(['GET', 'POST'], '/{token}/deleteMessage', 'App\Controllers\BotApi\MessagingController@deleteMessage');
+    $router->match(['GET', 'POST'], '/{token}/deleteMessages', 'App\Controllers\BotApi\MessagingController@deleteMessages');
 
-    // === Inline ===
-    $router->post('/{token}/answerInlineQuery', 'App\Controllers\BotApi\InlineController@answerInlineQuery');
-    $router->post('/{token}/savePreparedInlineMessage', 'App\Controllers\BotApi\InlineController@savePreparedInlineMessage');
-    $router->post('/{token}/savePreparedKeyboardButton', 'App\Controllers\BotApi\InlineController@savePreparedKeyboardButton');
-    $router->post('/{token}/answerWebAppQuery', 'App\Controllers\BotApi\InlineController@answerWebAppQuery');
+    // ==================== REACTIONS ====================
+    $router->match(['GET', 'POST'], '/{token}/setMessageReaction', 'App\Controllers\BotApi\MessagingController@setMessageReaction');
+    $router->match(['GET', 'POST'], '/{token}/deleteMessageReaction', 'App\Controllers\BotApi\MessagingController@deleteMessageReaction');
+    $router->match(['GET', 'POST'], '/{token}/deleteAllMessageReactions', 'App\Controllers\BotApi\MessagingController@deleteAllMessageReactions');
 
-    // === Files ===
-    $router->post('/{token}/getFile', 'App\Controllers\BotApi\MediaController@getFile');
+    // ==================== CHAT METHODS ====================
+    $router->match(['GET', 'POST'], '/{token}/getChat', 'App\Controllers\BotApi\ChatController@getChat');
+    $router->match(['GET', 'POST'], '/{token}/getChatAdministrators', 'App\Controllers\BotApi\ChatController@getChatAdministrators');
+    $router->match(['GET', 'POST'], '/{token}/getChatMember', 'App\Controllers\BotApi\ChatController@getChatMember');
+    $router->match(['GET', 'POST'], '/{token}/getChatMemberCount', 'App\Controllers\BotApi\ChatController@getChatMemberCount');
+    $router->match(['GET', 'POST'], '/{token}/setChatTitle', 'App\Controllers\BotApi\ChatController@setChatTitle');
+    $router->match(['GET', 'POST'], '/{token}/setChatDescription', 'App\Controllers\BotApi\ChatController@setChatDescription');
+    $router->match(['GET', 'POST'], '/{token}/setChatPhoto', 'App\Controllers\BotApi\ChatController@setChatPhoto');
+    $router->match(['GET', 'POST'], '/{token}/deleteChatPhoto', 'App\Controllers\BotApi\ChatController@deleteChatPhoto');
+    $router->match(['GET', 'POST'], '/{token}/setChatPermissions', 'App\Controllers\BotApi\ChatController@setChatPermissions');
+    $router->match(['GET', 'POST'], '/{token}/setChatAdministratorCustomTitle', 'App\Controllers\BotApi\ChatController@setChatAdministratorCustomTitle');
+    $router->match(['GET', 'POST'], '/{token}/setChatMenuButton', 'App\Controllers\BotApi\ChatController@setChatMenuButton');
+    $router->match(['GET', 'POST'], '/{token}/getChatMenuButton', 'App\Controllers\BotApi\ChatController@getChatMenuButton');
+    $router->match(['GET', 'POST'], '/{token}/exportChatInviteLink', 'App\Controllers\BotApi\ChatController@exportChatInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/createChatInviteLink', 'App\Controllers\BotApi\ChatController@createChatInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/editChatInviteLink', 'App\Controllers\BotApi\ChatController@editChatInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/revokeChatInviteLink', 'App\Controllers\BotApi\ChatController@revokeChatInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/approveChatJoinRequest', 'App\Controllers\BotApi\ChatController@approveChatJoinRequest');
+    $router->match(['GET', 'POST'], '/{token}/declineChatJoinRequest', 'App\Controllers\BotApi\ChatController@declineChatJoinRequest');
+    $router->match(['GET', 'POST'], '/{token}/leaveChat', 'App\Controllers\BotApi\ChatController@leaveChat');
+    $router->match(['GET', 'POST'], '/{token}/setChatStickerSet', 'App\Controllers\BotApi\ChatController@setChatStickerSet');
+    $router->match(['GET', 'POST'], '/{token}/deleteChatStickerSet', 'App\Controllers\BotApi\ChatController@deleteChatStickerSet');
 
-    // === Forum ===
-    $router->post('/{token}/createForumTopic', 'App\Controllers\BotApi\ForumController@createForumTopic');
-    $router->post('/{token}/editForumTopic', 'App\Controllers\BotApi\ForumController@editForumTopic');
-    $router->post('/{token}/closeForumTopic', 'App\Controllers\BotApi\ForumController@closeForumTopic');
-    $router->post('/{token}/reopenForumTopic', 'App\Controllers\BotApi\ForumController@reopenForumTopic');
-    $router->post('/{token}/deleteForumTopic', 'App\Controllers\BotApi\ForumController@deleteForumTopic');
-    $router->post('/{token}/unpinAllForumTopicMessages', 'App\Controllers\BotApi\ForumController@unpinAllForumTopicMessages');
-    $router->post('/{token}/getForumTopicIconStickers', 'App\Controllers\BotApi\ForumController@getForumTopicIconStickers');
-    $router->post('/{token}/hideGeneralForumTopic', 'App\Controllers\BotApi\ForumController@hideGeneralForumTopic');
-    $router->post('/{token}/unhideGeneralForumTopic', 'App\Controllers\BotApi\ForumController@unhideGeneralForumTopic');
-    $router->post('/{token}/editGeneralForumTopic', 'App\Controllers\BotApi\ForumController@editGeneralForumTopic');
-    $router->post('/{token}/closeGeneralForumTopic', 'App\Controllers\BotApi\ForumController@closeGeneralForumTopic');
-    $router->post('/{token}/reopenGeneralForumTopic', 'App\Controllers\BotApi\ForumController@reopenGeneralForumTopic');
-    $router->post('/{token}/unpinAllGeneralForumTopicMessages', 'App\Controllers\BotApi\ForumController@unpinAllGeneralForumTopicMessages');
+    // ==================== BAN / RESTRICT ====================
+    $router->match(['GET', 'POST'], '/{token}/banChatMember', 'App\Controllers\BotApi\ChatController@banChatMember');
+    $router->match(['GET', 'POST'], '/{token}/unbanChatMember', 'App\Controllers\BotApi\ChatController@unbanChatMember');
+    $router->match(['GET', 'POST'], '/{token}/restrictChatMember', 'App\Controllers\BotApi\ChatController@restrictChatMember');
+    $router->match(['GET', 'POST'], '/{token}/promoteChatMember', 'App\Controllers\BotApi\ChatController@promoteChatMember');
 
-    // === Stickers ===
-    $router->post('/{token}/getStickerSet', 'App\Controllers\BotApi\StickerController@getStickerSet');
-    $router->post('/{token}/getCustomEmojiStickers', 'App\Controllers\BotApi\StickerController@getCustomEmojiStickers');
-    $router->post('/{token}/uploadStickerFile', 'App\Controllers\BotApi\StickerController@uploadStickerFile');
-    $router->post('/{token}/createNewStickerSet', 'App\Controllers\BotApi\StickerController@createNewStickerSet');
-    $router->post('/{token}/addStickerToSet', 'App\Controllers\BotApi\StickerController@addStickerToSet');
-    $router->post('/{token}/setStickerPositionInSet', 'App\Controllers\BotApi\StickerController@setStickerPositionInSet');
-    $router->post('/{token}/deleteStickerFromSet', 'App\Controllers\BotApi\StickerController@deleteStickerFromSet');
-    $router->post('/{token}/replaceStickerInSet', 'App\Controllers\BotApi\StickerController@replaceStickerInSet');
-    $router->post('/{token}/setStickerSetTitle', 'App\Controllers\BotApi\StickerController@setStickerSetTitle');
-    $router->post('/{token}/setStickerSetThumbnail', 'App\Controllers\BotApi\StickerController@setStickerSetThumbnail');
-    $router->post('/{token}/setCustomEmojiStickerSetThumbnail', 'App\Controllers\BotApi\StickerController@setCustomEmojiStickerSetThumbnail');
-    $router->post('/{token}/setStickerEmojiList', 'App\Controllers\BotApi\StickerController@setStickerEmojiList');
-    $router->post('/{token}/setStickerKeywords', 'App\Controllers\BotApi\StickerController@setStickerKeywords');
-    $router->post('/{token}/setStickerMaskPosition', 'App\Controllers\BotApi\StickerController@setStickerMaskPosition');
+    // ==================== PIN ====================
+    $router->match(['GET', 'POST'], '/{token}/pinChatMessage', 'App\Controllers\BotApi\ChatController@pinChatMessage');
+    $router->match(['GET', 'POST'], '/{token}/unpinChatMessage', 'App\Controllers\BotApi\ChatController@unpinChatMessage');
+    $router->match(['GET', 'POST'], '/{token}/unpinAllChatMessages', 'App\Controllers\BotApi\ChatController@unpinAllChatMessages');
 
-    // === Payments ===
-    $router->post('/{token}/sendInvoice', 'App\Controllers\BotApi\PaymentController@sendInvoice');
-    $router->post('/{token}/createInvoiceLink', 'App\Controllers\BotApi\PaymentController@createInvoiceLink');
-    $router->post('/{token}/answerShippingQuery', 'App\Controllers\BotApi\PaymentController@answerShippingQuery');
-    $router->post('/{token}/answerPreCheckoutQuery', 'App\Controllers\BotApi\PaymentController@answerPreCheckoutQuery');
-    $router->post('/{token}/getStarTransactions', 'App\Controllers\BotApi\PaymentController@getStarTransactions');
-    $router->post('/{token}/refundStarPayment', 'App\Controllers\BotApi\PaymentController@refundStarPayment');
+    // ==================== USER METHODS ====================
+    $router->match(['GET', 'POST'], '/{token}/getUserProfilePhotos', 'App\Controllers\BotApi\UserController@getUserProfilePhotos');
+    $router->match(['GET', 'POST'], '/{token}/getUserProfileAudios', 'App\Controllers\BotApi\UserController@getUserProfileAudios');
+    $router->match(['GET', 'POST'], '/{token}/setUserEmojiStatus', 'App\Controllers\BotApi\UserController@setUserEmojiStatus');
+    $router->match(['GET', 'POST'], '/{token}/removeUserVerification', 'App\Controllers\BotApi\UserController@removeUserVerification');
+    $router->match(['GET', 'POST'], '/{token}/removeChatVerification', 'App\Controllers\BotApi\UserController@removeChatVerification');
+    $router->match(['GET', 'POST'], '/{token}/verifyUser', 'App\Controllers\BotApi\UserController@verifyUser');
+    $router->match(['GET', 'POST'], '/{token}/verifyChat', 'App\Controllers\BotApi\UserController@verifyChat');
+    $router->match(['GET', 'POST'], '/{token}/setMyProfilePhoto', 'App\Controllers\BotApi\UserController@setMyProfilePhoto');
+    $router->match(['GET', 'POST'], '/{token}/removeMyProfilePhoto', 'App\Controllers\BotApi\UserController@removeMyProfilePhoto');
 
-    // === Game ===
-    $router->post('/{token}/sendGame', 'App\Controllers\BotApi\GameController@sendGame');
-    $router->post('/{token}/setGameScore', 'App\Controllers\BotApi\GameController@setGameScore');
-    $router->post('/{token}/getGameHighScores', 'App\Controllers\BotApi\GameController@getGameHighScores');
+    // ==================== CALLBACK ====================
+    $router->match(['GET', 'POST'], '/{token}/answerCallbackQuery', 'App\Controllers\BotApi\CallbackController@answerCallbackQuery');
 
-    // === Passport ===
-    $router->post('/{token}/setPassportDataErrors', 'App\Controllers\BotApi\PassportController@setPassportDataErrors');
+    // ==================== INLINE MODE ====================
+    $router->match(['GET', 'POST'], '/{token}/answerInlineQuery', 'App\Controllers\BotApi\InlineController@answerInlineQuery');
+    $router->match(['GET', 'POST'], '/{token}/savePreparedInlineMessage', 'App\Controllers\BotApi\InlineController@savePreparedInlineMessage');
+    $router->match(['GET', 'POST'], '/{token}/savePreparedKeyboardButton', 'App\Controllers\BotApi\InlineController@savePreparedKeyboardButton');
+    $router->match(['GET', 'POST'], '/{token}/answerWebAppQuery', 'App\Controllers\BotApi\InlineController@answerWebAppQuery');
+
+    // ==================== FILES ====================
+    $router->match(['GET', 'POST'], '/{token}/getFile', 'App\Controllers\BotApi\MediaController@getFile');
+
+    // ==================== FORUM ====================
+    $router->match(['GET', 'POST'], '/{token}/createForumTopic', 'App\Controllers\BotApi\ForumController@createForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/editForumTopic', 'App\Controllers\BotApi\ForumController@editForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/closeForumTopic', 'App\Controllers\BotApi\ForumController@closeForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/reopenForumTopic', 'App\Controllers\BotApi\ForumController@reopenForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/deleteForumTopic', 'App\Controllers\BotApi\ForumController@deleteForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/unpinAllForumTopicMessages', 'App\Controllers\BotApi\ForumController@unpinAllForumTopicMessages');
+    $router->match(['GET', 'POST'], '/{token}/getForumTopicIconStickers', 'App\Controllers\BotApi\ForumController@getForumTopicIconStickers');
+    $router->match(['GET', 'POST'], '/{token}/hideGeneralForumTopic', 'App\Controllers\BotApi\ForumController@hideGeneralForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/unhideGeneralForumTopic', 'App\Controllers\BotApi\ForumController@unhideGeneralForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/editGeneralForumTopic', 'App\Controllers\BotApi\ForumController@editGeneralForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/closeGeneralForumTopic', 'App\Controllers\BotApi\ForumController@closeGeneralForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/reopenGeneralForumTopic', 'App\Controllers\BotApi\ForumController@reopenGeneralForumTopic');
+    $router->match(['GET', 'POST'], '/{token}/unpinAllGeneralForumTopicMessages', 'App\Controllers\BotApi\ForumController@unpinAllGeneralForumTopicMessages');
+
+    // ==================== STICKERS ====================
+    $router->match(['GET', 'POST'], '/{token}/getStickerSet', 'App\Controllers\BotApi\StickerController@getStickerSet');
+    $router->match(['GET', 'POST'], '/{token}/getCustomEmojiStickers', 'App\Controllers\BotApi\StickerController@getCustomEmojiStickers');
+    $router->match(['GET', 'POST'], '/{token}/uploadStickerFile', 'App\Controllers\BotApi\StickerController@uploadStickerFile');
+    $router->match(['GET', 'POST'], '/{token}/createNewStickerSet', 'App\Controllers\BotApi\StickerController@createNewStickerSet');
+    $router->match(['GET', 'POST'], '/{token}/addStickerToSet', 'App\Controllers\BotApi\StickerController@addStickerToSet');
+    $router->match(['GET', 'POST'], '/{token}/setStickerPositionInSet', 'App\Controllers\BotApi\StickerController@setStickerPositionInSet');
+    $router->match(['GET', 'POST'], '/{token}/deleteStickerFromSet', 'App\Controllers\BotApi\StickerController@deleteStickerFromSet');
+    $router->match(['GET', 'POST'], '/{token}/replaceStickerInSet', 'App\Controllers\BotApi\StickerController@replaceStickerInSet');
+    $router->match(['GET', 'POST'], '/{token}/setStickerSetTitle', 'App\Controllers\BotApi\StickerController@setStickerSetTitle');
+    $router->match(['GET', 'POST'], '/{token}/setStickerSetThumbnail', 'App\Controllers\BotApi\StickerController@setStickerSetThumbnail');
+    $router->match(['GET', 'POST'], '/{token}/setCustomEmojiStickerSetThumbnail', 'App\Controllers\BotApi\StickerController@setCustomEmojiStickerSetThumbnail');
+    $router->match(['GET', 'POST'], '/{token}/setStickerEmojiList', 'App\Controllers\BotApi\StickerController@setStickerEmojiList');
+    $router->match(['GET', 'POST'], '/{token}/setStickerKeywords', 'App\Controllers\BotApi\StickerController@setStickerKeywords');
+    $router->match(['GET', 'POST'], '/{token}/setStickerMaskPosition', 'App\Controllers\BotApi\StickerController@setStickerMaskPosition');
+
+    // ==================== PAYMENTS ====================
+    $router->match(['GET', 'POST'], '/{token}/sendInvoice', 'App\Controllers\BotApi\PaymentController@sendInvoice');
+    $router->match(['GET', 'POST'], '/{token}/createInvoiceLink', 'App\Controllers\BotApi\PaymentController@createInvoiceLink');
+    $router->match(['GET', 'POST'], '/{token}/answerShippingQuery', 'App\Controllers\BotApi\PaymentController@answerShippingQuery');
+    $router->match(['GET', 'POST'], '/{token}/answerPreCheckoutQuery', 'App\Controllers\BotApi\PaymentController@answerPreCheckoutQuery');
+    $router->match(['GET', 'POST'], '/{token}/getStarTransactions', 'App\Controllers\BotApi\PaymentController@getStarTransactions');
+    $router->match(['GET', 'POST'], '/{token}/refundStarPayment', 'App\Controllers\BotApi\PaymentController@refundStarPayment');
+
+    // ==================== GAMES ====================
+    $router->match(['GET', 'POST'], '/{token}/sendGame', 'App\Controllers\BotApi\GameController@sendGame');
+    $router->match(['GET', 'POST'], '/{token}/setGameScore', 'App\Controllers\BotApi\GameController@setGameScore');
+    $router->match(['GET', 'POST'], '/{token}/getGameHighScores', 'App\Controllers\BotApi\GameController@getGameHighScores');
+
+    // ==================== PASSPORT ====================
+    $router->match(['GET', 'POST'], '/{token}/setPassportDataErrors', 'App\Controllers\BotApi\PassportController@setPassportDataErrors');
+
+    // ==================== STARS & GIFT ====================
+    $router->match(['GET', 'POST'], '/{token}/getMyStarBalance', 'App\Controllers\BotApi\StarsController@getMyStarBalance');
+    $router->match(['GET', 'POST'], '/{token}/sendGift', 'App\Controllers\BotApi\StarsController@sendGift');
+    $router->match(['GET', 'POST'], '/{token}/getAvailableGifts', 'App\Controllers\BotApi\StarsController@getAvailableGifts');
+    $router->match(['GET', 'POST'], '/{token}/getChatGifts', 'App\Controllers\BotApi\StarsController@getChatGifts');
+    $router->match(['GET', 'POST'], '/{token}/getUserGifts', 'App\Controllers\BotApi\StarsController@getUserGifts');
+    $router->match(['GET', 'POST'], '/{token}/convertGiftToStars', 'App\Controllers\BotApi\StarsController@convertGiftToStars');
+    $router->match(['GET', 'POST'], '/{token}/transferGift', 'App\Controllers\BotApi\StarsController@transferGift');
+    $router->match(['GET', 'POST'], '/{token}/upgradeGift', 'App\Controllers\BotApi\StarsController@upgradeGift');
+    $router->match(['GET', 'POST'], '/{token}/giftPremiumSubscription', 'App\Controllers\BotApi\StarsController@giftPremiumSubscription');
+    $router->match(['GET', 'POST'], '/{token}/editUserStarSubscription', 'App\Controllers\BotApi\StarsController@editUserStarSubscription');
+
+    // ==================== BUSINESS ====================
+    $router->match(['GET', 'POST'], '/{token}/setBusinessAccountName', 'App\Controllers\BotApi\BusinessController@setBusinessAccountName');
+    $router->match(['GET', 'POST'], '/{token}/setBusinessAccountUsername', 'App\Controllers\BotApi\BusinessController@setBusinessAccountUsername');
+    $router->match(['GET', 'POST'], '/{token}/setBusinessAccountBio', 'App\Controllers\BotApi\BusinessController@setBusinessAccountBio');
+    $router->match(['GET', 'POST'], '/{token}/setBusinessAccountProfilePhoto', 'App\Controllers\BotApi\BusinessController@setBusinessAccountProfilePhoto');
+    $router->match(['GET', 'POST'], '/{token}/removeBusinessAccountProfilePhoto', 'App\Controllers\BotApi\BusinessController@removeBusinessAccountProfilePhoto');
+    $router->match(['GET', 'POST'], '/{token}/setBusinessAccountGiftSettings', 'App\Controllers\BotApi\BusinessController@setBusinessAccountGiftSettings');
+    $router->match(['GET', 'POST'], '/{token}/getBusinessConnection', 'App\Controllers\BotApi\BusinessController@getBusinessConnection');
+    $router->match(['GET', 'POST'], '/{token}/readBusinessMessage', 'App\Controllers\BotApi\BusinessController@readBusinessMessage');
+    $router->match(['GET', 'POST'], '/{token}/deleteBusinessMessages', 'App\Controllers\BotApi\BusinessController@deleteBusinessMessages');
+    $router->match(['GET', 'POST'], '/{token}/getBusinessAccountStarBalance', 'App\Controllers\BotApi\BusinessController@getBusinessAccountStarBalance');
+    $router->match(['GET', 'POST'], '/{token}/transferBusinessAccountStars', 'App\Controllers\BotApi\BusinessController@transferBusinessAccountStars');
+
+    // ==================== STORIES ====================
+    $router->match(['GET', 'POST'], '/{token}/postStory', 'App\Controllers\BotApi\StoriesController@postStory');
+    $router->match(['GET', 'POST'], '/{token}/editStory', 'App\Controllers\BotApi\StoriesController@editStory');
+    $router->match(['GET', 'POST'], '/{token}/deleteStory', 'App\Controllers\BotApi\StoriesController@deleteStory');
+    $router->match(['GET', 'POST'], '/{token}/repostStory', 'App\Controllers\BotApi\StoriesController@repostStory');
+
+    // ==================== MISCELLANEOUS ====================
+    $router->match(['GET', 'POST'], '/{token}/answerChatJoinRequestQuery', 'App\Controllers\BotApi\MiscellaneousController@answerChatJoinRequestQuery');
+    $router->match(['GET', 'POST'], '/{token}/answerGuestQuery', 'App\Controllers\BotApi\MiscellaneousController@answerGuestQuery');
+    $router->match(['GET', 'POST'], '/{token}/approveSuggestedPost', 'App\Controllers\BotApi\MiscellaneousController@approveSuggestedPost');
+    $router->match(['GET', 'POST'], '/{token}/declineSuggestedPost', 'App\Controllers\BotApi\MiscellaneousController@declineSuggestedPost');
+    $router->match(['GET', 'POST'], '/{token}/banChatSenderChat', 'App\Controllers\BotApi\MiscellaneousController@banChatSenderChat');
+    $router->match(['GET', 'POST'], '/{token}/unbanChatSenderChat', 'App\Controllers\BotApi\MiscellaneousController@unbanChatSenderChat');
+    $router->match(['GET', 'POST'], '/{token}/createChatSubscriptionInviteLink', 'App\Controllers\BotApi\MiscellaneousController@createChatSubscriptionInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/editChatSubscriptionInviteLink', 'App\Controllers\BotApi\MiscellaneousController@editChatSubscriptionInviteLink');
+    $router->match(['GET', 'POST'], '/{token}/deleteStickerSet', 'App\Controllers\BotApi\MiscellaneousController@deleteStickerSet');
+    $router->match(['GET', 'POST'], '/{token}/getManagedBotAccessSettings', 'App\Controllers\BotApi\MiscellaneousController@getManagedBotAccessSettings');
+    $router->match(['GET', 'POST'], '/{token}/setManagedBotAccessSettings', 'App\Controllers\BotApi\MiscellaneousController@setManagedBotAccessSettings');
+    $router->match(['GET', 'POST'], '/{token}/getManagedBotToken', 'App\Controllers\BotApi\MiscellaneousController@getManagedBotToken');
+    $router->match(['GET', 'POST'], '/{token}/replaceManagedBotToken', 'App\Controllers\BotApi\MiscellaneousController@replaceManagedBotToken');
+    $router->match(['GET', 'POST'], '/{token}/setChatMemberTag', 'App\Controllers\BotApi\MiscellaneousController@setChatMemberTag');
+    $router->match(['GET', 'POST'], '/{token}/getUserPersonalChatMessages', 'App\Controllers\BotApi\MiscellaneousController@getUserPersonalChatMessages');
+    $router->match(['GET', 'POST'], '/{token}/getUserChatBoosts', 'App\Controllers\BotApi\MiscellaneousController@getUserChatBoosts');
+    $router->match(['GET', 'POST'], '/{token}/sendChatJoinRequestWebApp', 'App\Controllers\BotApi\MiscellaneousController@sendChatJoinRequestWebApp');
 
 }, [RateLimitMiddleware::class, AuthMiddleware::class]);

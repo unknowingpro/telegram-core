@@ -116,6 +116,22 @@ class ChatModel extends BaseModel
     }
 
     /**
+     * Convert chat member to Telegram-compatible ChatMember array
+     */
+    public function toTelegramMember(array $member): array
+    {
+        $userModel = new UserModel();
+        $user = $userModel->find($member['user_id']);
+
+        return [
+            'user' => $user ? $userModel->toTelegram($user) : ['id' => 0, 'is_bot' => false, 'first_name' => 'Unknown'],
+            'status' => $member['role'] === 'owner' ? 'creator' : ($member['status'] === 'kicked' ? 'kicked' : ($member['role'] === 'admin' ? 'administrator' : 'member')),
+            'custom_title' => $member['custom_title'] ?? null,
+            'until_date' => $member['restricted_until'] ?? null,
+        ];
+    }
+
+    /**
      * Convert chat to Telegram-compatible array
      */
     public function toTelegram(array $chat): array

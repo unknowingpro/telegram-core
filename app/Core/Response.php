@@ -23,14 +23,14 @@ class Response
     }
 
     /**
-     * Success response: { ok: true, data: ... }
+     * Success response: { ok: true, result: ... }
+     * Mirrors Telegram Bot API exact response format
      */
     public static function ok(mixed $data = null, array $meta = []): self
     {
         $response = [
             'ok' => true,
-            'data' => $data,
-            'error' => null,
+            'result' => $data,
         ];
         if ($meta) {
             $response['meta'] = $meta;
@@ -39,22 +39,20 @@ class Response
     }
 
     /**
-     * Error response: { ok: false, error: { code, message, details? } }
+     * Error response: { ok: false, error_code: ..., description: "..." }
+     * Mirrors Telegram Bot API exact error format
      */
-    public static function error(string $message, int $statusCode = 400, ?array $details = null): self
+    public static function error(string $description, int $errorCode = 400, ?array $parameters = null): self
     {
         $error = [
-            'code' => $statusCode,
-            'message' => $message,
-        ];
-        if ($details !== null) {
-            $error['details'] = $details;
-        }
-        return new self($statusCode, [
             'ok' => false,
-            'data' => null,
-            'error' => $error,
-        ]);
+            'error_code' => $errorCode,
+            'description' => $description,
+        ];
+        if ($parameters !== null) {
+            $error['parameters'] = $parameters;
+        }
+        return new self($errorCode, $error);
     }
 
     /**

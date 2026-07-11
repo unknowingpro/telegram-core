@@ -10,7 +10,7 @@ use App\Models\UpdateModel;
 
 /**
  * Update controller — handles getUpdates, setWebhook, deleteWebhook, getWebhookInfo
- * Mirrors Telegram Bot API update methods
+ * Mirrors Telegram Bot API update methods exactly
  */
 class UpdateController extends BaseController
 {
@@ -44,6 +44,12 @@ class UpdateController extends BaseController
         // Convert to Telegram format
         $result = array_map([$this->updateModel, 'toTelegram'], $updates);
 
+        // Mark as read up to the highest update ID returned
+        if (!empty($updates)) {
+            $lastId = max(array_column($updates, 'id'));
+            $this->updateModel->markAsRead($userId, (int) $lastId);
+        }
+
         return $this->ok($result);
     }
 
@@ -52,14 +58,52 @@ class UpdateController extends BaseController
      */
     public function setWebhook(Request $request, string $token): Response
     {
-        $url = $this->required($request, 'url');
-        $secretToken = $this->input($request, 'secret_token');
-        $allowedUpdates = $this->input($request, 'allowed_updates');
+        try {
+            $url = $this->required($request, 'url');
+            $secretToken = $this->input($request, 'secret_token');
+            $allowedUpdates = $this->input($request, 'allowed_updates');
+            $maxConnections = $this->intInput($request, 'max_connections', 40);
+            $ipAddress = $this->input($request, 'ip_address');
+            $dropPendingUpdates = $this->boolInput($request, 'drop_pending_updates');
+            $hasCustomCertificate = $this->boolInput($request, 'certificate') || $this->input($request, 'certificate') !== null;
 
-        // TODO: Store webhook config in database
-        // TODO: Validate URL is reachable
+            $botId = $this->getBotUserId($token);
 
-        return $this->ok(true);
+            // Delete existing webhook if drop_pending_updates
+            if ($dropPendingUpdates) {
+                $this->db->table('webhooks')
+                    ->where('user_id', $botId)
+                    ->delete();
+            }
+
+            // Upsert webhook
+            $existing = $this->db->table('webhooks')
+                ->where('user_id', $botId)
+                ->first();
+
+            $webhookData = [
+                'url' => $url,
+                'secret_token' => $secretToken,
+                'allowed_updates' => is_string($allowedUpdates) ? $allowedUpdates : json_encode($allowedUpdates),
+                'has_custom_certificate' => $hasCustomCertificate,
+                'max_connections' => $maxConnections,
+                'ip_address' => $ipAddress,
+            ];
+
+            if ($existing) {
+                $this->db->table('webhooks')
+                    ->where('user_id', $botId)
+                    ->update($webhookData);
+            } else {
+                $webhookData['user_id'] = $botId;
+                $webhookData['pending_update_count'] = 0;
+                $this->db->table('webhooks')->insert($webhookData);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -67,7 +111,19 @@ class UpdateController extends BaseController
      */
     public function deleteWebhook(Request $request, string $token): Response
     {
-        // TODO: Remove webhook from database
+        $botId = $this->getBotUserId($token);
+        $dropPending = $this->boolInput($request, 'drop_pending_updates');
+
+        $this->db->table('webhooks')
+            ->where('user_id', $botId)
+            ->delete();
+
+        if ($dropPending) {
+            $this->db->table('updates')
+                ->where('user_id', $botId)
+                ->delete();
+        }
+
         return $this->ok(true);
     }
 
@@ -76,12 +132,34 @@ class UpdateController extends BaseController
      */
     public function getWebhookInfo(Request $request, string $token): Response
     {
+        $botId = $this->getBotUserId($token);
+
+        $webhook = $this->db->table('webhooks')
+            ->where('user_id', $botId)
+            ->first();
+
+        if (!$webhook) {
+            return $this->ok([
+                'url' => '',
+                'has_custom_certificate' => false,
+                'pending_update_count' => 0,
+                'last_error_date' => null,
+                'last_error_message' => null,
+                'last_synchronization_error_date' => null,
+                'max_connections' => 40,
+                'ip_address' => null,
+            ]);
+        }
+
         return $this->ok([
-            'url' => '',
-            'has_custom_certificate' => false,
-            'pending_update_count' => 0,
-            'last_error_date' => null,
-            'last_error_message' => null,
+            'url' => $webhook['url'],
+            'has_custom_certificate' => (bool) $webhook['has_custom_certificate'],
+            'pending_update_count' => (int) ($webhook['pending_update_count'] ?? 0),
+            'last_error_date' => $webhook['last_error_date'] ?? null,
+            'last_error_message' => $webhook['last_error'] ?? null,
+            'last_synchronization_error_date' => null,
+            'max_connections' => (int) ($webhook['max_connections'] ?? 40),
+            'ip_address' => $webhook['ip_address'] ?? null,
         ]);
     }
 

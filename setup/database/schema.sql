@@ -242,3 +242,303 @@ CREATE TABLE IF NOT EXISTS pinned_messages (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- =====================================================
+-- Schema migrations for additional fields
+-- =====================================================
+ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS max_connections INT UNSIGNED NOT NULL DEFAULT 40;
+ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45) NULL;
+ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_synchronization_error_date TIMESTAMP NULL;
+ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_until TIMESTAMP NULL;
+ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_permissions JSON NULL;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS caption_entities JSON NULL;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS parse_mode VARCHAR(32) NULL;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS show_caption_above_media BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS disable_notification BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS message_thread_id BIGINT UNSIGNED NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS first_name VARCHAR(255) NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS last_name VARCHAR(255) NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS invite_link VARCHAR(512) NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS linked_chat_id BIGINT UNSIGNED NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS slow_mode_delay INT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS message_auto_delete_time INT UNSIGNED NULL;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS has_protected_content BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS has_visible_history BOOLEAN NOT NULL DEFAULT 1;
+
+-- =====================================================
+-- Bot Accounts (bots registered on this platform)
+-- Bot Accounts (bots registered on this platform)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS bot_accounts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    token VARCHAR(64) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL DEFAULT '',
+    username VARCHAR(64) NULL UNIQUE,
+    description TEXT NULL,
+    short_description VARCHAR(120) NULL,
+    about TEXT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 1,
+    can_join_groups BOOLEAN NOT NULL DEFAULT 1,
+    can_read_all_group_messages BOOLEAN NOT NULL DEFAULT 0,
+    supports_inline_queries BOOLEAN NOT NULL DEFAULT 0,
+    has_main_web_app BOOLEAN NOT NULL DEFAULT 0,
+    can_connect_to_business BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_bot_token (token),
+    INDEX idx_bot_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Sticker Sets
+-- =====================================================
+CREATE TABLE IF NOT EXISTS sticker_sets (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(128) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    sticker_type ENUM('regular', 'mask', 'custom_emoji') NOT NULL DEFAULT 'regular',
+    is_animated BOOLEAN NOT NULL DEFAULT 0,
+    is_video BOOLEAN NOT NULL DEFAULT 0,
+    thumbnail_file_id BIGINT UNSIGNED NULL,
+    owner_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ss_name (name),
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Stickers
+-- =====================================================
+CREATE TABLE IF NOT EXISTS stickers (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    set_id BIGINT UNSIGNED NOT NULL,
+    file_id VARCHAR(64) NOT NULL,
+    file_unique_id VARCHAR(64) NOT NULL,
+    type ENUM('regular', 'mask', 'custom_emoji') NOT NULL DEFAULT 'regular',
+    width INT UNSIGNED NOT NULL DEFAULT 512,
+    height INT UNSIGNED NOT NULL DEFAULT 512,
+    is_animated BOOLEAN NOT NULL DEFAULT 0,
+    is_video BOOLEAN NOT NULL DEFAULT 0,
+    emoji VARCHAR(255) NULL,
+    file_size BIGINT UNSIGNED NULL DEFAULT 0,
+    position INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_stickers_set (set_id),
+    FOREIGN KEY (set_id) REFERENCES sticker_sets(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Polls
+-- =====================================================
+CREATE TABLE IF NOT EXISTS polls (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    message_id BIGINT UNSIGNED NULL,
+    question TEXT NOT NULL,
+    options JSON NOT NULL,
+    is_anonymous BOOLEAN NOT NULL DEFAULT 1,
+    type ENUM('regular', 'quiz') NOT NULL DEFAULT 'regular',
+    allows_multiple_answers BOOLEAN NOT NULL DEFAULT 0,
+    correct_option_id INT UNSIGNED NULL,
+    explanation TEXT NULL,
+    explanation_entities JSON NULL,
+    open_period INT UNSIGNED NULL,
+    close_date TIMESTAMP NULL,
+    is_closed BOOLEAN NOT NULL DEFAULT 0,
+    total_voter_count INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_polls_message (message_id),
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Poll Votes
+-- =====================================================
+CREATE TABLE IF NOT EXISTS poll_votes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    poll_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    option_ids JSON NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_poll_vote (poll_id, user_id),
+    INDEX idx_pv_poll (poll_id),
+    FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Inline Queries
+-- =====================================================
+CREATE TABLE IF NOT EXISTS inline_queries (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    query TEXT NOT NULL,
+    offset_val VARCHAR(64) NULL,
+    chat_type VARCHAR(32) NULL,
+    location JSON NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_iq_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Callback Queries
+-- =====================================================
+CREATE TABLE IF NOT EXISTS callback_queries (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    message_id BIGINT UNSIGNED NULL,
+    chat_id BIGINT UNSIGNED NULL,
+    data TEXT NULL,
+    game_short_name VARCHAR(64) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_cq_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Invoice / Payment
+-- =====================================================
+CREATE TABLE IF NOT EXISTS invoices (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    payload VARCHAR(128) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'XTR',
+    total_amount BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    prices JSON NULL,
+    max_tip_amount BIGINT UNSIGNED NULL,
+    suggested_tip_amounts JSON NULL,
+    provider_token VARCHAR(255) NULL,
+    start_parameter VARCHAR(64) NULL,
+    is_paid BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_inv_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Game Scores
+-- =====================================================
+CREATE TABLE IF NOT EXISTS game_scores (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    game_short_name VARCHAR(64) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    chat_id BIGINT UNSIGNED NULL,
+    score BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    force BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_game_score (game_short_name, user_id, chat_id),
+    INDEX idx_gs_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Chat Invite Links
+-- =====================================================
+CREATE TABLE IF NOT EXISTS invite_links (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    chat_id BIGINT UNSIGNED NOT NULL,
+    creator_id BIGINT UNSIGNED NOT NULL,
+    invite_link VARCHAR(512) NOT NULL UNIQUE,
+    name VARCHAR(255) NULL,
+    expire_date TIMESTAMP NULL,
+    member_limit INT UNSIGNED NULL,
+    creates_join_request BOOLEAN NOT NULL DEFAULT 0,
+    is_primary BOOLEAN NOT NULL DEFAULT 0,
+    is_revoked BOOLEAN NOT NULL DEFAULT 0,
+    pending_join_request_count INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_il_chat (chat_id),
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Star Transactions (Telegram Stars economy)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS star_transactions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    amount BIGINT NOT NULL DEFAULT 0,
+    type ENUM('charge', 'refund', 'purchase') NOT NULL DEFAULT 'charge',
+    description TEXT NULL,
+    invoice_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_st_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Business Accounts
+-- =====================================================
+CREATE TABLE IF NOT EXISTS business_accounts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NULL,
+    bio TEXT NULL,
+    username VARCHAR(64) NULL,
+    profile_photo_file_id BIGINT UNSIGNED NULL,
+    intro TEXT NULL,
+    location JSON NULL,
+    opening_hours JSON NULL,
+    gift_settings JSON NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ba_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- User Gifts
+-- =====================================================
+CREATE TABLE IF NOT EXISTS user_gifts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    gift_id VARCHAR(64) NOT NULL,
+    text TEXT NULL,
+    emoji VARCHAR(32) NULL,
+    is_upgraded BOOLEAN NOT NULL DEFAULT 0,
+    can_be_transferred BOOLEAN NOT NULL DEFAULT 0,
+    can_be_upgraded BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ug_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Chat Boosts
+-- =====================================================
+CREATE TABLE IF NOT EXISTS chat_boosts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    chat_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    source VARCHAR(64) NOT NULL DEFAULT 'premium',
+    expire_date TIMESTAMP NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_cb_chat (chat_id),
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- Stories
+-- =====================================================
+CREATE TABLE IF NOT EXISTS stories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    chat_id BIGINT UNSIGNED NOT NULL,
+    media_file_id VARCHAR(64) NOT NULL,
+    caption TEXT NULL,
+    entities JSON NULL,
+    parse_mode VARCHAR(32) NULL,
+    is_pinned BOOLEAN NOT NULL DEFAULT 0,
+    expire_date TIMESTAMP NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_stories_user (user_id),
+    INDEX idx_stories_chat (chat_id),
+    INDEX idx_stories_active (deleted_at, expire_date),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

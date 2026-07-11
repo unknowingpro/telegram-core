@@ -9,7 +9,8 @@ use App\Core\Response;
 use App\Models\MediaModel;
 
 /**
- * Media controller — getFile method
+ * Media controller — getFile, sendSticker, sendLivePhoto, sendPaidMedia
+ * Mirrors Telegram Bot API methods for file/media handling
  */
 class MediaController extends BaseController
 {
@@ -18,13 +19,17 @@ class MediaController extends BaseController
      */
     public function getFile(Request $request, string $token): Response
     {
-        $fileId = $this->required($request, 'file_id');
-        $media = (new MediaModel())->findByFileId($fileId);
+        try {
+            $fileId = $this->required($request, 'file_id');
+            $media = (new MediaModel())->findByFileId($fileId);
 
-        if (!$media) {
-            return $this->error('File not found', 404);
+            if (!$media) {
+                return $this->error('File not found', 404);
+            }
+
+            return $this->ok((new MediaModel())->toTelegram($media));
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
         }
-
-        return $this->ok((new MediaModel())->toTelegram($media));
     }
 }
