@@ -129,16 +129,38 @@ class ChatMemberModel extends BaseModel
     }
 
     /**
-     * Ban a member
+     * Ban a member (user or sender chat)
+     *
+     * Supports optional options: until_date, is_sender_chat
+     * If member record doesn't exist (e.g., sender_chat), creates one
      */
-    public function banMember(int|string $chatId, int|string $userId): bool
+    public function banMember(int|string $chatId, int|string $userId, array $options = []): bool
     {
         $member = $this->getMember($chatId, $userId);
+
         if (!$member) {
-            return false;
+            $this->create([
+                'chat_id' => $chatId,
+                'user_id' => $userId,
+                'role' => 'member',
+                'status' => 'kicked',
+                'is_sender_chat' => !empty($options['is_sender_chat']),
+                'banned_until' => $options['until_date'] ?? null,
+                'joined_at' => now(),
+            ]);
+            return true;
         }
 
-        $this->update($member['id'], ['status' => 'kicked']);
+        $update = ['status' => 'kicked'];
+
+        if (!empty($options['is_sender_chat'])) {
+            $update['is_sender_chat'] = true;
+        }
+        if (!empty($options['until_date'])) {
+            $update['banned_until'] = $options['until_date'];
+        }
+
+        $this->update($member['id'], $update);
         return true;
     }
 

@@ -440,14 +440,9 @@ class ChatController extends BaseController
             $revokeMessages = $this->boolInput($request, 'revoke_messages', true);
 
             $model = new ChatMemberModel();
-            $model->banMember($chatId, $userId);
-
-            // Set timed ban if until_date provided
-            if ($untilDate > 0) {
-                $model->updateMember($chatId, $userId, [
-                    'restricted_until' => date('Y-m-d H:i:s', $untilDate),
-                ]);
-            }
+            $model->banMember($chatId, $userId, [
+                'until_date' => $untilDate > 0 ? date('Y-m-d H:i:s', $untilDate) : null,
+            ]);
 
             // Optionally revoke all recent messages
             if ($revokeMessages) {
@@ -466,14 +461,60 @@ class ChatController extends BaseController
 
     /**
      * unbanChatMember — Unban a user
+     * Supports only_if_banned parameter — only unbans if user is currently banned
      */
     public function unbanChatMember(Request $request, string $token): Response
     {
         $chatId = $this->required($request, 'chat_id');
         $userId = $this->required($request, 'user_id');
+        $onlyIfBanned = $this->boolInput($request, 'only_if_banned');
+
+        $member = (new ChatMemberModel())->getMember($chatId, $userId);
+
+        // If only_if_banned is set, only proceed if user is currently banned
+        if ($onlyIfBanned && (!$member || $member['status'] !== 'kicked')) {
+            return $this->ok(true);
+        }
 
         (new ChatMemberModel())->removeMember($chatId, $userId);
         return $this->ok(true);
+    }
+
+    /**
+     * banChatSenderChat — Ban a channel chat in a supergroup or channel
+     */
+    public function banChatSenderChat(Request $request, string $token): Response
+    {
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $senderChatId = $this->required($request, 'sender_chat_id');
+            $untilDate = $this->intInput($request, 'until_date');
+
+            (new ChatMemberModel())->banMember($chatId, $senderChatId, [
+                'until_date' => $untilDate ? date('Y-m-d H:i:s', $untilDate) : null,
+                'is_sender_chat' => true,
+            ]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * unbanChatSenderChat — Unban a previously banned channel chat
+     */
+    public function unbanChatSenderChat(Request $request, string $token): Response
+    {
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $senderChatId = $this->required($request, 'sender_chat_id');
+
+            (new ChatMemberModel())->removeMember($chatId, $senderChatId);
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
