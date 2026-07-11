@@ -251,6 +251,10 @@ ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45) NULL;
 ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_synchronization_error_date TIMESTAMP NULL;
 ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_until TIMESTAMP NULL;
 ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_permissions JSON NULL;
+ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS admin_permissions JSON NULL;
+ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS use_independent_chat_permissions BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE stickers ADD COLUMN IF NOT EXISTS keywords JSON NULL;
+ALTER TABLE stickers ADD COLUMN IF NOT EXISTS mask_position JSON NULL;
 ALTER TABLE messages CHANGE COLUMN content_type content_type ENUM(
     'text', 'photo', 'video', 'audio', 'document', 'sticker',
     'voice', 'video_note', 'location', 'contact', 'poll',

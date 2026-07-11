@@ -432,11 +432,35 @@ class ChatController extends BaseController
      */
     public function banChatMember(Request $request, string $token): Response
     {
-        $chatId = $this->required($request, 'chat_id');
-        $userId = $this->required($request, 'user_id');
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $userId = $this->required($request, 'user_id');
+            $untilDate = $this->intInput($request, 'until_date');
+            $revokeMessages = $this->boolInput($request, 'revoke_messages', true);
 
-        (new ChatMemberModel())->banMember($chatId, $userId);
-        return $this->ok(true);
+            $model = new ChatMemberModel();
+            $model->banMember($chatId, $userId);
+
+            // Set timed ban if until_date provided
+            if ($untilDate > 0) {
+                $model->updateMember($chatId, $userId, [
+                    'restricted_until' => date('Y-m-d H:i:s', $untilDate),
+                ]);
+            }
+
+            // Optionally revoke all recent messages
+            if ($revokeMessages) {
+                $this->db->table('messages')
+                    ->where('chat_id', $chatId)
+                    ->where('sender_id', $userId)
+                    ->where('created_at', '>', date('Y-m-d H:i:s', time() - 86400))
+                    ->update(['deleted_at' => date('Y-m-d H:i:s')]);
+            }
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -465,6 +489,7 @@ class ChatController extends BaseController
             (new ChatMemberModel())->updateMember($chatId, $userId, [
                 'restricted_until' => $this->intInput($request, 'until_date') ? date('Y-m-d H:i:s', $this->intInput($request, 'until_date')) : null,
                 'restricted_permissions' => json_encode($permissions),
+                'use_independent_chat_permissions' => $this->boolInput($request, 'use_independent_chat_permissions'),
             ]);
             return $this->ok(true);
         } catch (\InvalidArgumentException $e) {
@@ -473,15 +498,52 @@ class ChatController extends BaseController
     }
 
     /**
-     * promoteChatMember — Promote user to admin
+     * promoteChatMember — Promote user to admin with granular permissions
+     *
+     * All 17 permission flags from Telegram Bot API are supported.
+     * Stored as JSON in chat_members.admin_permissions.
+     * When no flags are passed, defaults to all true (full admin).
      */
     public function promoteChatMember(Request $request, string $token): Response
     {
-        $chatId = $this->required($request, 'chat_id');
-        $userId = $this->required($request, 'user_id');
+        try {
+            $chatId = $this->required($request, 'chat_id');
+            $userId = $this->required($request, 'user_id');
 
-        (new ChatMemberModel())->setRole($chatId, $userId, 'admin');
-        return $this->ok(true);
+            // Collect all permission flags (only set explicit Booleans)
+            $permissions = [];
+            foreach ([
+                'is_anonymous', 'can_manage_chat', 'can_delete_messages',
+                'can_manage_video_chats', 'can_restrict_members', 'can_promote_members',
+                'can_change_info', 'can_invite_users', 'can_post_stories',
+                'can_edit_stories', 'can_delete_stories', 'can_post_messages',
+                'can_edit_messages', 'can_pin_messages', 'can_manage_topics',
+                'can_manage_direct_messages', 'can_manage_tags',
+            ] as $flag) {
+                $val = $request->input($flag);
+                if ($val !== null) {
+                    $permissions[$flag] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                }
+            }
+
+            $model = new ChatMemberModel();
+
+            // If no explicit flags, grant full admin (Telegram default behavior)
+            if (empty($permissions)) {
+                $model->setRole($chatId, $userId, 'admin');
+                $model->updateMember($chatId, $userId, ['admin_permissions' => null]);
+                return $this->ok(true);
+            }
+
+            $model->updateMember($chatId, $userId, [
+                'role' => 'admin',
+                'admin_permissions' => json_encode($permissions),
+            ]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**

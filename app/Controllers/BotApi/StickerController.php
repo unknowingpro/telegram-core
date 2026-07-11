@@ -366,9 +366,19 @@ class StickerController extends BaseController
      */
     public function setStickerKeywords(Request $request, string $token): Response
     {
-        // Sticker keywords stored in a separate table would be ideal,
-        // but for now we note the API compatibility
-        return $this->ok(true);
+        try {
+            $sticker = $this->required($request, 'sticker');
+            $keywordsRaw = $this->required($request, 'keywords');
+            $keywords = is_string($keywordsRaw) ? json_decode($keywordsRaw, true) : $keywordsRaw;
+
+            $this->db->table('stickers')
+                ->where('file_id', $sticker)
+                ->update(['keywords' => is_array($keywords) ? json_encode($keywords) : $keywords]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     /**
@@ -376,6 +386,18 @@ class StickerController extends BaseController
      */
     public function setStickerMaskPosition(Request $request, string $token): Response
     {
-        return $this->ok(true);
+        try {
+            $sticker = $this->required($request, 'sticker');
+            $maskPositionRaw = $this->required($request, 'mask_position');
+            $maskPosition = is_string($maskPositionRaw) ? json_decode($maskPositionRaw, true) : $maskPositionRaw;
+
+            $this->db->table('stickers')
+                ->where('file_id', $sticker)
+                ->update(['mask_position' => json_encode($maskPosition)]);
+
+            return $this->ok(true);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 }

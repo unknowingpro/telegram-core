@@ -22,12 +22,16 @@ class InlineController extends BaseController
             $inlineQueryId = $this->required($request, 'inline_query_id');
             $resultsRaw = $this->required($request, 'results');
             $results = is_string($resultsRaw) ? json_decode($resultsRaw, true) : $resultsRaw;
+            $nextOffset = $this->input($request, 'next_offset');
+            $buttonRaw = $this->input($request, 'button');
+            $button = $buttonRaw ? (is_string($buttonRaw) ? json_decode($buttonRaw, true) : $buttonRaw) : null;
+            $isPersonal = $this->boolInput($request, 'is_personal');
 
             // Store the answered inline query for audit
             $this->db->table('inline_queries')->insert([
                 'user_id' => $this->getBotUserId($token),
                 'query' => json_encode($results),
-                'offset_val' => $this->input($request, 'next_offset'),
+                'offset_val' => $nextOffset,
                 'chat_type' => $this->input($request, 'chat_type'),
             ]);
 
