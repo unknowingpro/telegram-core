@@ -35,6 +35,9 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $result = $this->messageService->sendText($chatId, $senderId, $text, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'entities' => $this->input($request, 'entities'),
@@ -70,6 +73,9 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendPhoto($chatId, $senderId, $photo, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
@@ -106,6 +112,9 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $audio, 'audio', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
@@ -113,9 +122,13 @@ class MessagingController extends BaseController
                 'performer' => $this->input($request, 'performer'),
                 'title' => $this->input($request, 'title'),
                 'thumbnail' => $this->input($request, 'thumbnail'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -147,6 +160,9 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $document, 'document', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
@@ -154,7 +170,10 @@ class MessagingController extends BaseController
                 'thumbnail' => $this->input($request, 'thumbnail'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -184,13 +203,20 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $video, 'video', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
                 'has_spoiler' => $this->boolInput($request, 'has_spoiler'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -224,13 +250,20 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $animation, 'animation', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
                 'has_spoiler' => $this->boolInput($request, 'has_spoiler'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -263,12 +296,18 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $voice, 'voice', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -297,9 +336,15 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $videoNote, 'video_note', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -327,13 +372,19 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $result = $this->messageService->sendLocation($chatId, $senderId, $latitude, $longitude, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'horizontal_accuracy' => (float) $this->input($request, 'horizontal_accuracy', 0),
                 'live_period' => $this->intInput($request, 'live_period'),
                 'heading' => $this->intInput($request, 'heading'),
                 'proximity_alert_radius' => $this->intInput($request, 'proximity_alert_radius'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
@@ -358,13 +409,19 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $result = $this->messageService->sendVenue($chatId, $senderId, $latitude, $longitude, $title, $address, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'foursquare_id' => $this->input($request, 'foursquare_id'),
                 'foursquare_type' => $this->input($request, 'foursquare_type'),
                 'google_place_id' => $this->input($request, 'google_place_id'),
                 'google_place_type' => $this->input($request, 'google_place_type'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
@@ -387,11 +444,17 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $result = $this->messageService->sendContact($chatId, $senderId, $phoneNumber, $firstName, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'last_name' => $this->input($request, 'last_name'),
                 'vcard' => $this->input($request, 'vcard'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
@@ -412,10 +475,16 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $result = $this->messageService->sendDice($chatId, $senderId, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'emoji' => $this->input($request, 'emoji', '🎲'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
@@ -533,9 +602,15 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMediaGroup($chatId, $senderId, $media, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
             ]);
 
             return $this->ok($result);
@@ -557,7 +632,11 @@ class MessagingController extends BaseController
             $messageId = $this->required($request, 'message_id');
             $senderId = $this->getBotUserId($token);
 
-            $result = $this->messageService->forwardMessage($fromChatId, $chatId, $messageId, $senderId);
+            $result = $this->messageService->forwardMessage($fromChatId, $chatId, $messageId, $senderId, [
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+            ]);
 
             if (!$result) {
                 return $this->error('Message not found', 404);
@@ -582,7 +661,11 @@ class MessagingController extends BaseController
 
             $messageIds = is_string($messageIdsRaw) ? json_decode($messageIdsRaw, true) : $messageIdsRaw;
 
-            $result = $this->messageService->forwardMessages($fromChatId, $chatId, $messageIds, $senderId);
+            $result = $this->messageService->forwardMessages($fromChatId, $chatId, $messageIds, $senderId, [
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+            ]);
 
             return $this->ok($result);
         } catch (\InvalidArgumentException $e) {
@@ -601,7 +684,17 @@ class MessagingController extends BaseController
             $messageId = $this->required($request, 'message_id');
             $senderId = $this->getBotUserId($token);
 
-            $result = $this->messageService->copyMessage($fromChatId, $chatId, $messageId, $senderId);
+            $result = $this->messageService->copyMessage($fromChatId, $chatId, $messageId, $senderId, [
+                'caption' => $this->input($request, 'caption'),
+                'parse_mode' => $this->input($request, 'parse_mode'),
+                'caption_entities' => $this->input($request, 'caption_entities'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
+                'reply_markup' => $this->input($request, 'reply_markup'),
+            ]);
 
             if (!$result) {
                 return $this->error('Message not found', 404);
@@ -626,7 +719,11 @@ class MessagingController extends BaseController
 
             $messageIds = is_string($messageIdsRaw) ? json_decode($messageIdsRaw, true) : $messageIdsRaw;
 
-            $result = $this->messageService->copyMessages($fromChatId, $chatId, $messageIds, $senderId);
+            $result = $this->messageService->copyMessages($fromChatId, $chatId, $messageIds, $senderId, [
+                'disable_notification' => $this->boolInput($request, 'disable_notification'),
+                'protect_content' => $this->boolInput($request, 'protect_content'),
+                'message_thread_id' => $this->input($request, 'message_thread_id'),
+            ]);
 
             return $this->ok($result);
         } catch (\InvalidArgumentException $e) {
@@ -637,13 +734,64 @@ class MessagingController extends BaseController
     // ==================== EDIT METHODS ====================
 
     /**
+     * Resolve message target: supports both (chat_id + message_id) and inline_message_id.
+     * Returns [chatId, messageId] or throws if neither is provided.
+     */
+    private function resolveMessageTarget(Request $request): array
+    {
+        $inlineMessageId = $this->input($request, 'inline_message_id');
+        if ($inlineMessageId !== null) {
+            // Inline messages use a composite ID — decode it
+            $parts = explode(':', $inlineMessageId, 3);
+            return [
+                $parts[0] ?? 0,
+                $parts[1] ?? 0,
+            ];
+        }
+
+        return [
+            $this->required($request, 'chat_id'),
+            $this->required($request, 'message_id'),
+        ];
+    }
+
+    /**
+     * Get common optional messaging parameters for edit methods
+     */
+    private function getEditOptions(Request $request): array
+    {
+        return [
+            'business_connection_id' => $this->input($request, 'business_connection_id'),
+            'inline_message_id' => $this->input($request, 'inline_message_id'),
+        ];
+    }
+
+    /**
+     * Global optional parameters applicable to all send/forward/copy methods.
+     * Merged into every send* method's options array.
+     */
+    private function getSendGlobals(Request $request): array
+    {
+        return [
+            'business_connection_id' => $this->input($request, 'business_connection_id'),
+            'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+            'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
+            'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+            'message_effect_id' => $this->input($request, 'message_effect_id'),
+            'reply_parameters' => $this->input($request, 'reply_parameters'),
+            'disable_notification' => $this->boolInput($request, 'disable_notification'),
+            'protect_content' => $this->boolInput($request, 'protect_content'),
+            'message_thread_id' => $this->input($request, 'message_thread_id'),
+        ];
+    }
+
+    /**
      * editMessageText — Edit text message
      */
     public function editMessageText(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
             $text = $this->required($request, 'text');
 
             $result = $this->messageService->editText($chatId, $messageId, $text, [
@@ -651,6 +799,8 @@ class MessagingController extends BaseController
                 'entities' => $this->input($request, 'entities'),
                 'link_preview_options' => $this->input($request, 'link_preview_options'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
             ]);
 
             return $this->ok($result);
@@ -665,13 +815,14 @@ class MessagingController extends BaseController
     public function editMessageCaption(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
 
             $result = $this->messageService->editCaption($chatId, $messageId, $this->input($request, 'caption'), [
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
             ]);
 
             return $this->ok($result);
@@ -686,14 +837,14 @@ class MessagingController extends BaseController
     public function editMessageMedia(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
             $mediaRaw = $this->required($request, 'media');
 
             $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
 
             $result = $this->messageService->editMedia($chatId, $messageId, $media, [
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
             ]);
 
             return $this->ok($result);
@@ -708,8 +859,7 @@ class MessagingController extends BaseController
     public function editMessageReplyMarkup(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
             $replyMarkup = $this->input($request, 'reply_markup');
 
             $result = $this->messageService->editReplyMarkup(
@@ -730,8 +880,7 @@ class MessagingController extends BaseController
     public function editMessageLiveLocation(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
             $latitude = (float) $this->required($request, 'latitude');
             $longitude = (float) $this->required($request, 'longitude');
 
@@ -740,6 +889,7 @@ class MessagingController extends BaseController
                 'heading' => $this->intInput($request, 'heading'),
                 'proximity_alert_radius' => $this->intInput($request, 'proximity_alert_radius'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
             ]);
 
             return $this->ok($result);
@@ -754,11 +904,11 @@ class MessagingController extends BaseController
     public function stopMessageLiveLocation(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
 
             $result = $this->messageService->stopLiveLocation($chatId, $messageId, [
                 'reply_markup' => $this->input($request, 'reply_markup'),
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
             ]);
 
             return $this->ok($result);
@@ -773,11 +923,10 @@ class MessagingController extends BaseController
     public function stopPoll(Request $request, string $token): Response
     {
         try {
-            $chatId = $this->required($request, 'chat_id');
-            $messageId = $this->required($request, 'message_id');
+            [$chatId, $messageId] = $this->resolveMessageTarget($request);
 
             // Find the message and mark poll as closed
-            $this->messageService->editText($chatId, $messageId, '', []); // just triggers edit_date
+            $this->messageService->editText($chatId, $messageId, '', []);
             return $this->ok([
                 'id' => (string) $messageId,
                 'question' => '',
@@ -900,9 +1049,15 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $sticker, 'sticker', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -931,11 +1086,20 @@ class MessagingController extends BaseController
             }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $photo, 'live_photo', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
+                'caption_entities' => $this->input($request, 'caption_entities'),
+                'has_spoiler' => $this->boolInput($request, 'has_spoiler'),
+                'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
@@ -976,12 +1140,17 @@ class MessagingController extends BaseController
             $starCount = (int) $this->input($request, 'star_count', 1);
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $media[0]['media'] ?? $media['media'] ?? '', 'paid_media', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'caption' => $this->input($request, 'caption'),
                 'parse_mode' => $this->input($request, 'parse_mode'),
                 'caption_entities' => $this->input($request, 'caption_entities'),
                 'show_caption_above_media' => $this->boolInput($request, 'show_caption_above_media'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
                 'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
                 'media_data' => [
@@ -1008,11 +1177,18 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $this->messageService->sendText($chatId, $senderId, $text, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
                 'parse_mode' => $this->input($request, 'parse_mode', 'MarkdownV2'),
                 'entities' => $this->input($request, 'entities'),
+                'link_preview_options' => $this->input($request, 'link_preview_options'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
 
@@ -1035,10 +1211,16 @@ class MessagingController extends BaseController
             $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
 
             $result = $this->messageService->sendText($chatId, $senderId, '', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
 
@@ -1104,10 +1286,16 @@ class MessagingController extends BaseController
             $items = is_string($itemsRaw) ? json_decode($itemsRaw, true) : $itemsRaw;
 
             $result = $this->messageService->sendText($chatId, $senderId, $title, [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
                 'reply_to_message_id' => $this->input($request, 'reply_to_message_id'),
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
                 'protect_content' => $this->boolInput($request, 'protect_content'),
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
                 'reply_markup' => $this->input($request, 'reply_markup'),
             ]);
 
@@ -1144,8 +1332,14 @@ class MessagingController extends BaseController
             $body = is_string($bodyRaw) ? json_decode($bodyRaw, true) : $bodyRaw;
 
             $result = $this->messageService->sendText($chatId, $senderId, '', [
+                'business_connection_id' => $this->input($request, 'business_connection_id'),
+                'direct_messages_topic_id' => $this->input($request, 'direct_messages_topic_id'),
+                'suggested_post_parameters' => $this->input($request, 'suggested_post_parameters'),
                 'message_thread_id' => $this->input($request, 'message_thread_id'),
                 'disable_notification' => true,
+                'allow_paid_broadcast' => $this->boolInput($request, 'allow_paid_broadcast'),
+                'message_effect_id' => $this->input($request, 'message_effect_id'),
+                'reply_parameters' => $this->input($request, 'reply_parameters'),
             ]);
 
             $this->db->table('messages')

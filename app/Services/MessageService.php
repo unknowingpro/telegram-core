@@ -507,7 +507,7 @@ class MessageService
     /**
      * Forward a message
      */
-    public function forwardMessage(int|string $fromChatId, int|string $toChatId, int|string $messageId, int|string $senderId): ?array
+    public function forwardMessage(int|string $fromChatId, int|string $toChatId, int|string $messageId, int|string $senderId, array $options = []): ?array
     {
         $newMessageId = $this->messages->forwardMessage($fromChatId, $toChatId, $messageId, $senderId);
         if (!$newMessageId) {
@@ -523,11 +523,11 @@ class MessageService
     /**
      * Forward multiple messages
      */
-    public function forwardMessages(int|string $fromChatId, int|string $toChatId, array $messageIds, int|string $senderId): array
+    public function forwardMessages(int|string $fromChatId, int|string $toChatId, array $messageIds, int|string $senderId, array $options = []): array
     {
         $results = [];
         foreach ($messageIds as $id) {
-            $result = $this->forwardMessage($fromChatId, $toChatId, $id, $senderId);
+            $result = $this->forwardMessage($fromChatId, $toChatId, $id, $senderId, $options);
             if ($result) {
                 $results[] = $result;
             }
@@ -538,7 +538,7 @@ class MessageService
     /**
      * Copy a message (forward without attribution)
      */
-    public function copyMessage(int|string $fromChatId, int|string $toChatId, int|string $messageId, int|string $senderId): ?array
+    public function copyMessage(int|string $fromChatId, int|string $toChatId, int|string $messageId, int|string $senderId, array $options = []): ?array
     {
         $original = $this->messages->getMessage($fromChatId, $messageId);
         if (!$original) {
@@ -549,11 +549,11 @@ class MessageService
             'chat_id' => $toChatId,
             'sender_id' => $senderId,
             'text' => $original['text'],
-            'caption' => $original['caption'],
+            'caption' => $options['caption'] ?? $original['caption'],
             'content_type' => $original['content_type'],
             'content_data' => $original['content_data'],
             'entities' => $original['entities'],
-            'caption_entities' => $original['caption_entities'] ?? null,
+            'caption_entities' => $options['caption_entities'] ?? $original['caption_entities'] ?? null,
         ]);
 
         $message = $this->messages->find($messageId);
@@ -564,11 +564,11 @@ class MessageService
     /**
      * Copy multiple messages
      */
-    public function copyMessages(int|string $fromChatId, int|string $toChatId, array $messageIds, int|string $senderId): array
+    public function copyMessages(int|string $fromChatId, int|string $toChatId, array $messageIds, int|string $senderId, array $options = []): array
     {
         $results = [];
         foreach ($messageIds as $id) {
-            $result = $this->copyMessage($fromChatId, $toChatId, $id, $senderId);
+            $result = $this->copyMessage($fromChatId, $toChatId, $id, $senderId, $options);
             if ($result) {
                 $results[] = $result;
             }
