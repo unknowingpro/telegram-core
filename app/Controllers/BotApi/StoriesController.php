@@ -20,9 +20,14 @@ class StoriesController extends BaseController
     {
         try {
             $userId = $this->required($request, 'user_id');
-            $mediaFileId = $this->required($request, 'media');
             $chatId = $this->input($request, 'chat_id', $userId);
             $expireInSec = $this->intInput($request, 'expire_in_sec', 86400);
+
+            // Handle file upload or string file_id for media
+            $mediaFileId = $this->resolveFileUpload($request, 'media', $userId);
+            if ($mediaFileId === null) {
+                $mediaFileId = $this->required($request, 'media');
+            }
 
             $storyId = $this->db->table('stories')->insert([
                 'user_id' => $userId,
@@ -68,7 +73,8 @@ class StoriesController extends BaseController
                 $updates['caption'] = $this->input($request, 'caption');
             }
             if ($this->input($request, 'media') !== null) {
-                $updates['media_file_id'] = $this->input($request, 'media');
+                $newMedia = $this->resolveFileUpload($request, 'media', $userId);
+                $updates['media_file_id'] = $newMedia ?? $this->input($request, 'media');
             }
             if ($this->input($request, 'entities') !== null) {
                 $updates['entities'] = $this->input($request, 'entities');

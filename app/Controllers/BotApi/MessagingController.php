@@ -61,8 +61,13 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $photo = $this->required($request, 'photo');
             $senderId = $this->getBotUserId($token);
+
+            // Handle file upload or string file_id
+            $photo = $this->resolveFileUpload($request, 'photo', $senderId);
+            if ($photo === null) {
+                $photo = $this->required($request, 'photo');
+            }
 
             $result = $this->messageService->sendPhoto($chatId, $senderId, $photo, [
                 'caption' => $this->input($request, 'caption'),
@@ -93,8 +98,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $audio = $this->required($request, 'audio');
             $senderId = $this->getBotUserId($token);
+
+            $audio = $this->resolveFileUpload($request, 'audio', $senderId);
+            if ($audio === null) {
+                $audio = $this->required($request, 'audio');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $audio, 'audio', [
                 'caption' => $this->input($request, 'caption'),
@@ -130,8 +139,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $document = $this->required($request, 'document');
             $senderId = $this->getBotUserId($token);
+
+            $document = $this->resolveFileUpload($request, 'document', $senderId);
+            if ($document === null) {
+                $document = $this->required($request, 'document');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $document, 'document', [
                 'caption' => $this->input($request, 'caption'),
@@ -163,8 +176,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $video = $this->required($request, 'video');
             $senderId = $this->getBotUserId($token);
+
+            $video = $this->resolveFileUpload($request, 'video', $senderId);
+            if ($video === null) {
+                $video = $this->required($request, 'video');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $video, 'video', [
                 'caption' => $this->input($request, 'caption'),
@@ -199,8 +216,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $animation = $this->required($request, 'animation');
             $senderId = $this->getBotUserId($token);
+
+            $animation = $this->resolveFileUpload($request, 'animation', $senderId);
+            if ($animation === null) {
+                $animation = $this->required($request, 'animation');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $animation, 'animation', [
                 'caption' => $this->input($request, 'caption'),
@@ -234,8 +255,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $voice = $this->required($request, 'voice');
             $senderId = $this->getBotUserId($token);
+
+            $voice = $this->resolveFileUpload($request, 'voice', $senderId);
+            if ($voice === null) {
+                $voice = $this->required($request, 'voice');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $voice, 'voice', [
                 'caption' => $this->input($request, 'caption'),
@@ -264,8 +289,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $videoNote = $this->required($request, 'video_note');
             $senderId = $this->getBotUserId($token);
+
+            $videoNote = $this->resolveFileUpload($request, 'video_note', $senderId);
+            if ($videoNote === null) {
+                $videoNote = $this->required($request, 'video_note');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $videoNote, 'video_note', [
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
@@ -459,6 +488,20 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
+
+            // Process file uploads within the media group
+            foreach ($media as $i => $item) {
+                $field = 'media_' . $i . '_file';
+                $uploaded = $this->resolveFileUpload($request, $field, $senderId);
+                if ($uploaded !== null) {
+                    $media[$i]['media'] = $uploaded;
+                } elseif (isset($item['media'])) {
+                    $attachResult = $this->resolveFileUpload($request, $item['media'], $senderId);
+                    if ($attachResult !== null) {
+                        $media[$i]['media'] = $attachResult;
+                    }
+                }
+            }
 
             $result = $this->messageService->sendMediaGroup($chatId, $senderId, $media, [
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
@@ -820,8 +863,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $sticker = $this->required($request, 'sticker');
             $senderId = $this->getBotUserId($token);
+
+            $sticker = $this->resolveFileUpload($request, 'sticker', $senderId);
+            if ($sticker === null) {
+                $sticker = $this->required($request, 'sticker');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $sticker, 'sticker', [
                 'disable_notification' => $this->boolInput($request, 'disable_notification'),
@@ -847,8 +894,12 @@ class MessagingController extends BaseController
     {
         try {
             $chatId = $this->required($request, 'chat_id');
-            $photo = $this->required($request, 'photo');
             $senderId = $this->getBotUserId($token);
+
+            $photo = $this->resolveFileUpload($request, 'photo', $senderId);
+            if ($photo === null) {
+                $photo = $this->required($request, 'photo');
+            }
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $photo, 'live_photo', [
                 'caption' => $this->input($request, 'caption'),
@@ -877,6 +928,22 @@ class MessagingController extends BaseController
             $senderId = $this->getBotUserId($token);
 
             $media = is_string($mediaRaw) ? json_decode($mediaRaw, true) : $mediaRaw;
+
+            // Process file uploads in the media array
+            foreach ($media as $i => $item) {
+                $field = 'media_' . $i . '_file';
+                $uploaded = $this->resolveFileUpload($request, $field, $senderId);
+                if ($uploaded !== null) {
+                    $media[$i]['media'] = $uploaded;
+                } elseif (isset($item['media'])) {
+                    // Check attach:// protocol
+                    $attachResult = $this->resolveFileUpload($request, $item['media'], $senderId);
+                    if ($attachResult !== null) {
+                        $media[$i]['media'] = $attachResult;
+                    }
+                }
+            }
+
             $starCount = (int) $this->input($request, 'star_count', 1);
 
             $result = $this->messageService->sendMedia($chatId, $senderId, $media[0]['media'] ?? $media['media'] ?? '', 'paid_media', [

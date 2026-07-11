@@ -122,12 +122,14 @@ class Router
 
     /**
      * Match a route pattern against a URI
-     * Supports {param} placeholders
+     * Supports {param} and {param:regex} placeholders
      */
     private function matchRoute(string $pattern, string $uri): array|false
     {
-        // Convert {param} to regex named groups
-        $regex = preg_replace('#\{(\w+)\}#', '(?P<$1>[^/]+)', $pattern);
+        // Handle {param:regex} — custom regex patterns first
+        $regex = preg_replace('#\{(\w+):([^}]+)\}#', '(?P<$1>$2)', $pattern);
+        // Handle {param} — default to [^/]+
+        $regex = preg_replace('#\{(\w+)\}#', '(?P<$1>[^/]+)', $regex);
         $regex = '#^' . $regex . '$#';
 
         if (preg_match($regex, $uri, $matches)) {

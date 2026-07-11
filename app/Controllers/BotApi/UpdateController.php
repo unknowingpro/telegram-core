@@ -24,6 +24,9 @@ class UpdateController extends BaseController
 
     /**
      * getUpdates — Long polling to receive updates
+     *
+     * When timeout > 0, blocks for up to that many seconds waiting for new updates.
+     * Uses short sleep-poll cycles to avoid blocking DB connections.
      */
     public function getUpdates(Request $request, string $token): Response
     {
@@ -38,19 +41,40 @@ class UpdateController extends BaseController
             $allowedUpdates = json_decode($allowedUpdates, true);
         }
 
-        // Get updates from queue
-        $updates = $this->updateModel->getUpdates($userId, $offset, $limit, $allowedUpdates);
+        // Clamp timeout to prevent excessive blocking (0-60 seconds)
+        $timeout = max(0, min($timeout, 60));
 
-        // Convert to Telegram format
-        $result = array_map([$this->updateModel, 'toTelegram'], $updates);
+        // Long-poll: if timeout > 0 and no updates yet, sleep-poll until
+        // we have data or the timeout expires
+        $maxWait = time() + $timeout;
+        $polled = false;
 
-        // Mark as read up to the highest update ID returned
-        if (!empty($updates)) {
-            $lastId = max(array_column($updates, 'id'));
-            $this->updateModel->markAsRead($userId, (int) $lastId);
-        }
+        do {
+            // Get updates from queue
+            $updates = $this->updateModel->getUpdates($userId, $offset, $limit, $allowedUpdates);
 
-        return $this->ok($result);
+            if (!empty($updates)) {
+                // Found updates — return immediately
+                $result = array_map([$this->updateModel, 'toTelegram'], $updates);
+
+                // Mark as read up to the highest update ID returned
+                $lastId = max(array_column($updates, 'id'));
+                $this->updateModel->markAsRead($userId, (int) $lastId);
+
+                return $this->ok($result);
+            }
+
+            if ($timeout > 0 && time() < $maxWait) {
+                // No updates yet and we have time — sleep briefly then poll again
+                $polled = true;
+                usleep(250_000); // 250ms between polls
+            } else {
+                break;
+            }
+        } while (true);
+
+        // No updates available (or timeout expired) — return empty array
+        return $this->ok([]);
     }
 
     /**

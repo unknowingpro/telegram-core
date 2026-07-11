@@ -98,24 +98,41 @@ class StickerController extends BaseController
     {
         try {
             $userId = $this->required($request, 'user_id');
-            $sticker = $this->input($request, 'sticker'); // InputFile
+            $sticker = $this->input($request, 'sticker'); // InputFile (multipart upload or file_id)
             $stickerFormat = $this->required($request, 'sticker_format');
 
-            $fileId = 'sticker_' . bin2hex(random_bytes(8));
-            $fileUniqueId = 's_' . bin2hex(random_bytes(6));
+            // Try to save the uploaded file physically
+            $fileResult = $this->resolveFileUpload($request, 'sticker', $userId, 'sticker_');
 
-            $this->db->table('media')->insert([
-                'user_id' => $userId,
-                'file_id' => $fileId,
-                'file_unique_id' => $fileUniqueId,
-                'file_size' => 0,
-                'mime_type' => $stickerFormat === 'static' ? 'image/webp' : ($stickerFormat === 'animated' ? 'application/x-tgsticker' : 'video/webm'),
-            ]);
+            if ($fileResult === null) {
+                // No file uploaded — generate a placeholder record
+                $fileId = 'sticker_' . bin2hex(random_bytes(8));
+                $fileUniqueId = 's_' . bin2hex(random_bytes(6));
+
+                $this->db->table('media')->insert([
+                    'user_id' => $userId,
+                    'file_id' => $fileId,
+                    'file_unique_id' => $fileUniqueId,
+                    'file_size' => 0,
+                    'mime_type' => $stickerFormat === 'static' ? 'image/webp' : ($stickerFormat === 'animated' ? 'application/x-tgsticker' : 'video/webm'),
+                ]);
+
+                return $this->ok([
+                    'file_id' => $fileId,
+                    'file_unique_id' => $fileUniqueId,
+                    'file_size' => 0,
+                ]);
+            }
+
+            // File was uploaded — return saved file info
+            $media = $this->db->table('media')
+                ->where('file_id', $fileResult)
+                ->first();
 
             return $this->ok([
-                'file_id' => $fileId,
-                'file_unique_id' => $fileUniqueId,
-                'file_size' => 0,
+                'file_id' => $media['file_id'],
+                'file_unique_id' => $media['file_unique_id'],
+                'file_size' => (int) ($media['file_size'] ?? 0),
             ]);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Services\FileService;
+
 /**
  * Base controller with common helpers
  * All controllers extend this
@@ -10,6 +12,7 @@ namespace App\Core;
 abstract class BaseController
 {
     protected Database $db;
+    private ?FileService $fileService = null;
 
     public function __construct()
     {
@@ -68,5 +71,52 @@ abstract class BaseController
     protected function boolInput(Request $request, string $key, bool $default = false): bool
     {
         return $request->bool($key, $default);
+    }
+
+    /**
+     * Resolve an input file from the request.
+     *
+     * If the request field contains a PHP file upload array (multipart/form-data),
+     * saves the file to disk via FileService and returns the generated file_id.
+     * If it's already a string (file_id reference), returns it as-is.
+     *
+     * @param Request $request The incoming request
+     * @param string $field The field name to check (e.g. 'photo', 'document')
+     * @param int|string $userId Owner of the file
+     * @param string|null $customFileIdPrefix Optional prefix (e.g. 'sticker_')
+     * @return string|null The file_id string, or null if no file/upload found
+     */
+    protected function resolveFileUpload(Request $request, string $field, int|string $userId, ?string $customFileIdPrefix = null): ?string
+    {
+        $value = $request->input($field);
+
+        // No input at all
+        if ($value === null) {
+            return null;
+        }
+
+        // It's a file upload array (multipart)
+        if (is_array($value) && isset($value['tmp_name']) && $value['tmp_name'] !== '') {
+            $this->fileService ??= new FileService();
+            $result = $this->fileService->storeUpload($value, $userId, $customFileIdPrefix);
+            return $result['file_id'];
+        }
+
+        // It's already a string (file_id or URL reference)
+        if (is_string($value) && $value !== '') {
+            // Check if it's an attach:// reference (Telegram InputFile attach protocol)
+            if (str_starts_with($value, 'attach://')) {
+                $attachField = substr($value, 9);
+                $attachValue = $request->input($attachField);
+                if (is_array($attachValue) && isset($attachValue['tmp_name']) && $attachValue['tmp_name'] !== '') {
+                    $this->fileService ??= new FileService();
+                    $result = $this->fileService->storeUpload($attachValue, $userId, $customFileIdPrefix);
+                    return $result['file_id'];
+                }
+            }
+            return $value;
+        }
+
+        return null;
     }
 }

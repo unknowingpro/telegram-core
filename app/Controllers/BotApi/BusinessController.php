@@ -90,6 +90,12 @@ class BusinessController extends BaseController
             $businessConnectionId = $this->required($request, 'business_connection_id');
             $photo = $this->required($request, 'photo');
 
+            // Handle file upload if this is an InputFile upload
+            $fileId = $this->resolveFileUpload($request, 'photo', 0);
+            if ($fileId !== null) {
+                $photo = $fileId;
+            }
+
             $this->db->table('business_accounts')
                 ->where('id', $businessConnectionId)
                 ->update(['profile_photo_file_id' => $photo]);

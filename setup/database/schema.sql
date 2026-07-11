@@ -251,6 +251,12 @@ ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45) NULL;
 ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_synchronization_error_date TIMESTAMP NULL;
 ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_until TIMESTAMP NULL;
 ALTER TABLE chat_members ADD COLUMN IF NOT EXISTS restricted_permissions JSON NULL;
+ALTER TABLE messages CHANGE COLUMN content_type content_type ENUM(
+    'text', 'photo', 'video', 'audio', 'document', 'sticker',
+    'voice', 'video_note', 'location', 'contact', 'poll',
+    'dice', 'game', 'animation', 'venue', 'invoice', 'live_photo',
+    'paid_media', 'checklist', 'rich_message'
+) NOT NULL DEFAULT 'text';
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS caption_entities JSON NULL;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS parse_mode VARCHAR(32) NULL;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS show_caption_above_media BOOLEAN NOT NULL DEFAULT 0;
@@ -274,9 +280,24 @@ ALTER TABLE messages ADD COLUMN IF NOT EXISTS allow_paid_broadcast BOOLEAN NOT N
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS message_effect_id VARCHAR(64) NULL;
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS sticker_set_name VARCHAR(128) NULL;
 ALTER TABLE bot_accounts ADD COLUMN IF NOT EXISTS default_admin_rights TEXT NULL;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS views INT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS flags INT UNSIGNED NOT NULL DEFAULT 0;
+
+-- Passport errors (setPassportDataErrors)
+CREATE TABLE IF NOT EXISTS passport_errors (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    type VARCHAR(64) NOT NULL DEFAULT 'unknown',
+    source VARCHAR(64) NULL,
+    field_name VARCHAR(128) NULL,
+    data_hash VARCHAR(128) NULL,
+    message JSON NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pe_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- Bot Accounts (bots registered on this platform)
 -- Bot Accounts (bots registered on this platform)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS bot_accounts (
